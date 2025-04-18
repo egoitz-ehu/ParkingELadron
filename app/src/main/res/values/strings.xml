@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">ParkingELadron</string>
+
+    <string name="welcome_title">EasyParking</string>
+    <string name="welcome_subtitle">Parking App</string>
+    <string name="welcome_createAccount">Crear una cuenta</string>
+    <string name="welcome_enter">Entrar en la cuenta</string>
+
+    <string name="login_title">Iniciar sesion</string>
+    <string name="login_email">Ingresa tu email</string>
+    <string name="login_password">Ingresa la contraseña</string>
+    <string name="login_enter">Entrar en la cuenta</string>
+    <string name="login_another">Otra forma</string>
+    <string name="login_forget">¿Olvidaste tu contraseña</string>
+    <string name="login_create">¿No tienes cuenta? Crea una</string>
+
+    <string name="register_title">Registrarse</string>
+    <string name="register_name">Ingresa tu nombre</string>
+    <string name="register_surname">Ingresa tu apellido</string>
+    <string name="register_email">Ingresa tu email</string>
+    <string name="register_password">Ingresa tu contraseña</string>
+    <string name="register_create">Crear una cuenta</string>
+    <string name="register_already">¿Ya tienes cuenta? Inicia sesión</string>
+
+    <string name="var_see">Ver reservas</string>
+    <string name="var_create">Realizar reserva</string>
+    <string name="var_profile">Perfil</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

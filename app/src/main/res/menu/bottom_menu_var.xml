@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/var_see"
+        android:icon="@drawable/reservasicon"
+        android:id="@+id/reservas"/>
+    <item android:title="@string/var_create"
+        android:icon="@drawable/createicon"
+        android:id="@+id/create"/>
+    <item android:title="@string/var_profile"
+        android:icon="@drawable/profileicon"
+        android:id="@+id/profile"/>
+</menu>

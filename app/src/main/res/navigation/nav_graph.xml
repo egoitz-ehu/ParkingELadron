@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/reservasFragment">
+
+    <fragment
+        android:id="@+id/reservasFragment"
+        android:name="com.lksnext.ParkingELadron.view.fragment.ReservasFragment"
+        android:label="fragment_reservas"
+        tools:layout="@layout/fragment_reservas" >
+    </fragment>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.lksnext.ParkingELadron.view.fragment.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+</navigation>
