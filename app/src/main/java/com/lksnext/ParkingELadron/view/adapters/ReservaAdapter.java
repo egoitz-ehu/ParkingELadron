@@ -8,12 +8,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lksnext.ParkingELadron.databinding.ItemReservaBinding;
+import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.view.adapters.ReservaViewHolder;
+
+import java.util.List;
+
 public class ReservaAdapter extends RecyclerView.Adapter<ReservaViewHolder>{
-    //Lista
-
-    public ReservaAdapter(){
-
+    private List<Reserva> reservaList;
+    public ReservaAdapter(List<Reserva> rList){
+        this.reservaList=rList;
     }
 
     @NonNull
@@ -26,12 +29,13 @@ public class ReservaAdapter extends RecyclerView.Adapter<ReservaViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull ReservaViewHolder holder, int position) {
-
+        Reserva reserva = reservaList.get(position);
+        holder.bind(reserva);
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return reservaList.size();
     }
 
 

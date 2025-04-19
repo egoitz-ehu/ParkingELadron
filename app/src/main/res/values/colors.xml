@@ -4,6 +4,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="mainOrange">#FF570C</color>
     <color name="mainDark">#2F2F2F</color>
-    <color name="secondaryWhite">AEAEB3</color>
+    <color name="secondaryWhite">#AEAEB3</color>
+
+    <color name="reservaReservado">#4EF462</color>
+    <color name="reservaCancelado">#F13C36</color>
+    <color name="reservaFinalizado">#F4B224</color>
 
 </resources>
