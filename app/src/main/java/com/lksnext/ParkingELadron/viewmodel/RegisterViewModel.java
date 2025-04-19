@@ -6,36 +6,19 @@ import androidx.lifecycle.ViewModel;
 
 public class RegisterViewModel extends ViewModel {
 
-    MutableLiveData<String> email = new MutableLiveData<String>(null);
-    MutableLiveData<String> name = new MutableLiveData<String>(null);
-    MutableLiveData<String> surname = new MutableLiveData<String>(null);
-    MutableLiveData<String> password = new MutableLiveData<String>(null);
+    private MutableLiveData<Boolean> registered = new MutableLiveData<Boolean>();
 
-    public LiveData<String> getEmail() {
-        return email;
+    public LiveData<Boolean> isRegistered() {
+        return registered;
     }
 
-    public void updateEmail(String email) {
-        this.email.setValue(email);
-    }
-
-    public LiveData<String> getName() {
-        return name;
-    }
-
-    public void updateName(String name) {
-        this.name.setValue(name);
-    }
-
-    public void updateSurname(String surname) {
-        this.surname.setValue(surname);
-    }
-
-    public void updatePassword(String password) {
-        this.password.setValue(password);
-    }
-
-    public void registerUser() {
+    public void registerUser(String name, String surname, String email, String password) {
         // TODO: Implementar lógica de registro de usuario
+        if(name.isEmpty() || surname.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            registered.setValue(Boolean.FALSE);
+        } else {
+            // TODO. Crear cuenta usando Firebase Auth
+            registered.setValue(Boolean.TRUE);
+        }
     }
 }

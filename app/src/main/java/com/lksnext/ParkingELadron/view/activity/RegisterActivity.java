@@ -2,14 +2,12 @@ package com.lksnext.ParkingELadron.view.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.lksnext.ParkingELadron.databinding.ActivityRegisterBinding;
-import com.lksnext.ParkingELadron.databinding.FragmentReservasBinding;
 import com.lksnext.ParkingELadron.viewmodel.RegisterViewModel;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -25,28 +23,23 @@ public class RegisterActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
 
-        binding.nameText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                viewModel.updateName(charSequence.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
+        binding.btnCreate.setOnClickListener(v -> {
+            String name = binding.nameText.getText().toString();
+            String surname = binding.surnameText.getText().toString();
+            String email = binding.emailText.getText().toString();
+            String password = binding.passwordText.getText().toString();
+            viewModel.registerUser(name,surname,email,password);
         });
 
-        viewModel.getName().observe(this, System.out::println);
-
-        binding.btnCreate.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
+        viewModel.isRegistered().observe(this, registered -> {
+            if(registered != null) {
+                if(registered){
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Error al registrar usuario", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
     }
 }
