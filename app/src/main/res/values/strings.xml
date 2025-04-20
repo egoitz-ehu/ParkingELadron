@@ -22,6 +22,9 @@
     <string name="register_create">Crear una cuenta</string>
     <string name="register_already">¿Ya tienes cuenta? Inicia sesión</string>
 
+    <string name="title_crear">Reservar</string>
+    <string name="crear_selectDia">Selecciona un día</string>
+
     <string name="var_see">Ver reservas</string>
     <string name="var_create">Realizar reserva</string>
     <string name="var_profile">Perfil</string>

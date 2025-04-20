@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.fragment.ReservasFragment">
+    tools:context=".view.fragment.ReservasFragment"
+    android:background="@drawable/reservas_bg">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewReservas"

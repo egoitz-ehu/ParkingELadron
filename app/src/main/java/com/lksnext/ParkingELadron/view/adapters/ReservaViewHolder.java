@@ -2,6 +2,7 @@ package com.lksnext.ParkingELadron.view.adapters;
 
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,5 +34,8 @@ public class ReservaViewHolder extends RecyclerView.ViewHolder {
             case Finalizado:
                 binding.tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.reservaFinalizado));
         }
+        binding.getRoot().setOnClickListener(v->{
+            Toast.makeText(v.getContext(), "Reserva seleccionado", Toast.LENGTH_SHORT).show();
+        });
     }
 }

@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
                 navController.navigate(R.id.reservasFragment);
                 return true;
             } else if(itemId == R.id.create) {
+                navController.navigate(R.id.crearFragment);
                 return true;
             } else if(itemId == R.id.profile) {
                 navController.navigate(R.id.profileFragment);
