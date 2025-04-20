@@ -28,6 +28,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/cvHoraInicio"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -61,23 +62,56 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="32dp"
-        >
+        app:layout_constraintBottom_toTopOf="@+id/cvHoraSalida">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/mainOrange"
             android:padding="8dp">
             <TextView
-                android:id="@+id/tvHora"
+                android:id="@+id/tvHoraInicio"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="@string/crear_selectDia"
+                android:text="@string/crear_selectHoraEntrada"
                 android:textColor="@color/white"
                 android:layout_weight="7"/>
             <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:src="@drawable/selectdia"
+                android:src="@drawable/selecthora"
+                android:background="@android:color/transparent"
+                android:layout_weight="2"
+                android:focusable="false"
+                android:clickable="false"
+                />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvHoraSalida"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/cvHoraInicio"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="32dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/mainOrange"
+            android:padding="8dp">
+            <TextView
+                android:id="@+id/tvHoraSalida"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="@string/crear_selectHoraEntrada"
+                android:textColor="@color/white"
+                android:layout_weight="7"/>
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/selecthora"
                 android:background="@android:color/transparent"
                 android:layout_weight="2"
                 android:focusable="false"
