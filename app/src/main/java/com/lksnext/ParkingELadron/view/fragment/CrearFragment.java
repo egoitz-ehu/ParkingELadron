@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -118,6 +120,28 @@ public class CrearFragment extends Fragment {
 
         viewModel.getHoraFin().observe(getViewLifecycleOwner(), horaFin -> {
             binding.tvHoraSalida.setText(horaFin);
+        });
+
+        String[] opciones = {
+                getString(R.string.op_normal),
+                getString(R.string.op_electrico),
+                getString(R.string.op_minusvalido),
+                getString(R.string.op_moto)
+        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, opciones);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinner.setAdapter(adapter);
+        binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                int pos =adapterView.getSelectedItemPosition();
+                Toast.makeText(getContext(), opciones[pos], Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
         });
     }
 }

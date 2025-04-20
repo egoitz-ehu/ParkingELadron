@@ -26,6 +26,11 @@
     <string name="crear_selectDia">Selecciona un día</string>
     <string name="crear_selectHoraEntrada">Selecciona hora de entrada</string>
 
+    <string name="op_normal">Normal</string>
+    <string name="op_electrico">Electrico</string>
+    <string name="op_minusvalido">Minusvalido</string>
+    <string name="op_moto">Moto</string>
+
     <string name="var_see">Ver reservas</string>
     <string name="var_create">Realizar reserva</string>
     <string name="var_profile">Perfil</string>
