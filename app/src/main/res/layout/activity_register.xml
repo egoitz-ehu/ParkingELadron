@@ -120,7 +120,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/mainOrange"
         android:layout_margin="32dp"
-        app:cornerRadius="32dp"/>
+        app:cornerRadius="32dp"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/tvAlready"

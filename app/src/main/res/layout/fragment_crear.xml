@@ -62,7 +62,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/cvHoraSalida">
+        app:layout_constraintBottom_toTopOf="@+id/cvHoraSalida"
+        android:textColor="@color/white">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -95,6 +96,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/spinner"
+        android:textColor="@color/white"
         android:layout_margin="32dp">
         <LinearLayout
             android:layout_width="match_parent"
@@ -127,9 +129,24 @@
        app:layout_constraintTop_toBottomOf="@id/cvHoraSalida"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintEnd_toEndOf="parent"
-       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintBottom_toTopOf="@+id/btnCrear"
        android:background="@drawable/spinner_bg"
        android:layout_margin="32dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCrear"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:text="@string/login_enter"
+        app:layout_constraintTop_toBottomOf="@+id/spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:backgroundTint="@color/mainOrange"
+        android:layout_marginHorizontal="32dp"
+        app:cornerRadius="32dp"
+        android:textColor="@color/white"
+        android:layout_marginBottom="64dp"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,7 +28,7 @@
 
     <string name="op_normal">Normal</string>
     <string name="op_electrico">Electrico</string>
-    <string name="op_minusvalido">Minusvalido</string>
+    <string name="op_minusvalido">Accesible</string>
     <string name="op_moto">Moto</string>
 
     <string name="var_see">Ver reservas</string>
@@ -36,4 +36,11 @@
     <string name="var_profile">Perfil</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="perfil_title">Perfil</string>
+    <string name="perfil_info">Información</string>
+    <string name="perfil_name">Nombre:</string>
+    <string name="perfil_surname">Apellido:</string>
+    <string name="perfil_email">Email:</string>
+    <string name="perfil_change">Cambiar la contraseña</string>
 </resources>

@@ -77,7 +77,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/mainOrange"
         android:layout_margin="32dp"
-        app:cornerRadius="32dp"/>
+        app:cornerRadius="32dp"
+        android:textColor="@color/white"/>
 
     <com.google.android.material.divider.MaterialDivider
         android:id="@+id/dividerLeft"

@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentCrearBinding;
+import com.lksnext.ParkingELadron.domain.TiposPlaza;
 import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
 
 import java.sql.Time;
@@ -135,13 +136,30 @@ public class CrearFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 int pos =adapterView.getSelectedItemPosition();
-                Toast.makeText(getContext(), opciones[pos], Toast.LENGTH_SHORT).show();
+                switch (pos){
+                    case 0:
+                        viewModel.setType(TiposPlaza.NORMAL);
+                        break;
+                    case 1:
+                        viewModel.setType(TiposPlaza.ELECTRICO);
+                        break;
+                    case 2:
+                        viewModel.setType(TiposPlaza.ACCESIBLE);
+                        break;
+                    case 3:
+                        viewModel.setType(TiposPlaza.MOTO);
+                        break;
+                }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 
             }
+        });
+
+        binding.btnCrear.setOnClickListener(v->{
+            viewModel.crearReserva();
         });
     }
 }

@@ -6,4 +6,9 @@
     </style>
 
     <style name="Theme.ParkingELadron" parent="Base.Theme.ParkingELadron" />
+
+    <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/mainOrange</item>
+    </style>
+
 </resources>

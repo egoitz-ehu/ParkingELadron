@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.lksnext.ParkingELadron.domain.TiposPlaza;
+
 import java.util.Date;
 
 public class CrearViewModel extends ViewModel {
@@ -14,6 +16,8 @@ public class CrearViewModel extends ViewModel {
     MutableLiveData<String> horaInicio = new MutableLiveData<String>();
 
     MutableLiveData<String> horaFin = new MutableLiveData<String>();
+
+    MutableLiveData<TiposPlaza> type = new MutableLiveData<TiposPlaza>();
 
     public LiveData<Date> getDate() {
         return date;
@@ -37,5 +41,18 @@ public class CrearViewModel extends ViewModel {
 
     public void setHoraFin(String horaFin) {
         this.horaFin.setValue(horaFin);
+    }
+
+    public LiveData<TiposPlaza> getType() {
+        return type;
+    }
+
+    public void setType(TiposPlaza type) {
+        this.type.setValue(type);
+    }
+
+    public boolean crearReserva() {
+        // TODO: Crear reserva
+        return true;
     }
 }
