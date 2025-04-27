@@ -43,4 +43,11 @@
     <string name="perfil_surname">Apellido:</string>
     <string name="perfil_email">Email:</string>
     <string name="perfil_change">Cambiar la contraseña</string>
+
+    <string name="forgot_title">Recuperar cuenta</string>
+    <string name="forgot_newPass">Ingresa la nueva contraseña</string>
+    <string name="forgot_newPassConfirm">Confirmar la nueva contraseña</string>
+    <string name="forgot_change">Cambiar contraseña</string>
+
+    <string name="change_title">Cambiar contraseña</string>
 </resources>
