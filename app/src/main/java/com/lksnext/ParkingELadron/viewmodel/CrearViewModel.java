@@ -8,16 +8,19 @@ import androidx.lifecycle.ViewModel;
 
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 
 public class CrearViewModel extends ViewModel {
-    MutableLiveData<Date> date = new MutableLiveData<Date>();
+    private MutableLiveData<Date> date = new MutableLiveData<Date>();
 
-    MutableLiveData<String> horaInicio = new MutableLiveData<String>();
+    private MutableLiveData<String> horaInicio = new MutableLiveData<String>();
 
-    MutableLiveData<String> horaFin = new MutableLiveData<String>();
+    private MutableLiveData<String> horaFin = new MutableLiveData<String>();
 
-    MutableLiveData<TiposPlaza> type = new MutableLiveData<TiposPlaza>();
+    private MutableLiveData<TiposPlaza> type = new MutableLiveData<TiposPlaza>();
 
     public LiveData<Date> getDate() {
         return date;
@@ -52,7 +55,12 @@ public class CrearViewModel extends ViewModel {
     }
 
     public boolean crearReserva() {
-        // TODO: Crear reserva
+        if(date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) return false;
+        if(date.getValue().before(new Date())) return false;
+        Calendar calen = Calendar.getInstance();
+        calen.add(Calendar.DAY_OF_YEAR,7);
+        Date limite = calen.getTime();
+        if(date.getValue().after(limite)) return false;
         return true;
     }
 }
