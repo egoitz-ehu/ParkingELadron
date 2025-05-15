@@ -129,7 +129,7 @@ public class CrearFragment extends Fragment {
                 getString(R.string.op_minusvalido),
                 getString(R.string.op_moto)
         };
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.drawable.spinner_selected_item, opciones);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_selected_item, opciones);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinner.setAdapter(adapter);
         binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
