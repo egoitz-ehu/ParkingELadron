@@ -22,9 +22,32 @@
     <string name="register_create">Crear una cuenta</string>
     <string name="register_already">¿Ya tienes cuenta? Inicia sesión</string>
 
+    <string name="title_crear">Reservar</string>
+    <string name="crear_selectDia">Selecciona un día</string>
+    <string name="crear_selectHoraEntrada">Selecciona hora de entrada</string>
+
+    <string name="op_normal">Normal</string>
+    <string name="op_electrico">Electrico</string>
+    <string name="op_minusvalido">Accesible</string>
+    <string name="op_moto">Moto</string>
+
     <string name="var_see">Ver reservas</string>
     <string name="var_create">Realizar reserva</string>
     <string name="var_profile">Perfil</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="perfil_title">Perfil</string>
+    <string name="perfil_info">Información</string>
+    <string name="perfil_name">Nombre:</string>
+    <string name="perfil_surname">Apellido:</string>
+    <string name="perfil_email">Email:</string>
+    <string name="perfil_change">Cambiar la contraseña</string>
+
+    <string name="forgot_title">Recuperar cuenta</string>
+    <string name="forgot_newPass">Ingresa la nueva contraseña</string>
+    <string name="forgot_newPassConfirm">Confirmar la nueva contraseña</string>
+    <string name="forgot_change">Cambiar contraseña</string>
+
+    <string name="change_title">Cambiar contraseña</string>
 </resources>
