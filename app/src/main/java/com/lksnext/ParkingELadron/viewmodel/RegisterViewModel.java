@@ -11,7 +11,7 @@ public class RegisterViewModel extends ViewModel {
     private AuthRepository authRepository;
 
     public RegisterViewModel(){
-        this(AuthRepository.getInstance());
+        this(new AuthRepository());
     }
 
     public RegisterViewModel(AuthRepository authRepository) {
