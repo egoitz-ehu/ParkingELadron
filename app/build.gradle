@@ -79,7 +79,7 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
                       '**/BuildConfig.*',
                       '**/Manifest*.*',
                       '**/*Test*.*',
-                      'app/src/main/java/com/lks/ParkingELadron/view/',  // Excluir toda la carpeta /view
+                      'app/src/main/java/com/lks/ParkingELadron/view/**',  // Excluir toda la carpeta /view
                       'android/**/*.*']
     def debugTree = fileTree(dir: "$buildDir/intermediates/javac/debug", excludes: fileFilter)
     def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
