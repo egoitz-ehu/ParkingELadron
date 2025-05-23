@@ -31,10 +31,6 @@ public class AuthRepository {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
-                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                .setDisplayName(name + " " + surname)
-                                .build();
-                        user.updateProfile(profileUpdates);
                         userLiveData.postValue(user);
                     } else {
                         errorLiveData.postValue(task.getException().getMessage());

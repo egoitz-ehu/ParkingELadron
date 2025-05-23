@@ -149,30 +149,4 @@ public class AuthRepositoryTest {
         repository.signOut();
         assertEquals(null, LiveDataTestUtil.getValue(repository.getUserLiveData()));
     }
-    @Test
-    public void registerUserWithEmail_success_callsUpdateProfileWithNameAndSurname() {
-        String email = "jola@prueba.com";
-        String password = "password";
-        String name = "John";
-        String surname = "Doe";
-
-        Task<AuthResult> mockTask = mock(Task.class);
-        when(mockAuth.createUserWithEmailAndPassword(email, password)).thenReturn(mockTask);
-        when(mockTask.isSuccessful()).thenReturn(true);
-
-        FirebaseUser mockUser = mock(FirebaseUser.class);
-        when(mockAuth.getCurrentUser()).thenReturn(mockUser);
-
-        ArgumentCaptor<OnCompleteListener<AuthResult>> captor = ArgumentCaptor.forClass(OnCompleteListener.class);
-        when(mockTask.addOnCompleteListener(captor.capture())).thenReturn(mockTask);
-
-        repository.registerUserWithEmail(email, password, name, surname);
-
-        captor.getValue().onComplete(mockTask);
-
-        ArgumentCaptor<UserProfileChangeRequest> profileCaptor = ArgumentCaptor.forClass(UserProfileChangeRequest.class);
-        verify(mockUser).updateProfile(profileCaptor.capture());
-        assertEquals("John Doe", profileCaptor.getValue().getDisplayName());
-    }
-
 }
