@@ -11,6 +11,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.lksnext.ParkingELadron.util.LiveDataTestUtil;
 
 import org.junit.Before;
@@ -47,6 +49,31 @@ public class AuthRepositoryTest {
     }
 
     @Test
+    public void registerUserWithEmail_whenFirebaseSucceeds_updatesUserLiveData() throws InterruptedException {
+        String email = "jola@prueba.com";
+        String password = "password";
+        String name = "John";
+        String surname = "Doe";
+
+        Task<AuthResult> mockTask = mock(Task.class);
+        when(mockAuth.createUserWithEmailAndPassword(email, password)).thenReturn(mockTask);
+        when(mockTask.isSuccessful()).thenReturn(true);
+
+        // Mock current user
+        FirebaseUser mockUser = mock(FirebaseUser.class);
+        when(mockAuth.getCurrentUser()).thenReturn(mockUser);
+
+        ArgumentCaptor<OnCompleteListener<AuthResult>> captor = ArgumentCaptor.forClass(OnCompleteListener.class);
+        when(mockTask.addOnCompleteListener(captor.capture())).thenReturn(mockTask);
+
+        repository.registerUserWithEmail(email, password, name, surname);
+
+        captor.getValue().onComplete(mockTask);
+
+        assertEquals(mockUser, LiveDataTestUtil.getValue(repository.getUserLiveData()));
+    }
+
+    @Test
     public void registerUserWithEmail_whenFirebaseFails() throws InterruptedException {
         String email = "jola@prueba.com";
         String password = "password";
@@ -71,4 +98,81 @@ public class AuthRepositoryTest {
 
         assertEquals("Registration error", LiveDataTestUtil.getValue(repository.getErrorLiveData()));
     }
+
+    @Test
+    public void signInWithEmailAndPassword_success_postsUser() throws InterruptedException {
+        String email = "jola@prueba.com";
+        String password = "password";
+
+        Task<AuthResult> mockTask = mock(Task.class);
+        when(mockAuth.signInWithEmailAndPassword(email, password)).thenReturn(mockTask);
+        when(mockTask.isSuccessful()).thenReturn(true);
+
+        FirebaseUser mockUser = mock(FirebaseUser.class);
+        when(mockAuth.getCurrentUser()).thenReturn(mockUser);
+
+        ArgumentCaptor<OnCompleteListener<AuthResult>> captor = ArgumentCaptor.forClass(OnCompleteListener.class);
+        when(mockTask.addOnCompleteListener(captor.capture())).thenReturn(mockTask);
+
+        repository.signInWithEmailAndPassword(email, password);
+
+        verify(mockAuth).signInWithEmailAndPassword(email, password);
+
+        captor.getValue().onComplete(mockTask);
+
+        assertEquals(mockUser, LiveDataTestUtil.getValue(repository.getUserLiveData()));
+    }
+
+    @Test
+    public void signInWithEmailAndPassword_failure_postsError() throws InterruptedException {
+        String email = "jola@prueba.com";
+        String password = "password";
+        Exception fakeException = new Exception("Login error");
+
+        Task<AuthResult> mockTask = mock(Task.class);
+        when(mockAuth.signInWithEmailAndPassword(email, password)).thenReturn(mockTask);
+        when(mockTask.isSuccessful()).thenReturn(false);
+        when(mockTask.getException()).thenReturn(fakeException);
+
+        ArgumentCaptor<OnCompleteListener<AuthResult>> captor = ArgumentCaptor.forClass(OnCompleteListener.class);
+        when(mockTask.addOnCompleteListener(captor.capture())).thenReturn(mockTask);
+
+        repository.signInWithEmailAndPassword(email, password);
+
+        captor.getValue().onComplete(mockTask);
+
+        assertEquals("Login error", LiveDataTestUtil.getValue(repository.getErrorLiveData()));
+    }
+
+    @Test
+    public void signOut_setsUserLiveDataToNull() throws InterruptedException {
+        repository.signOut();
+        assertEquals(null, LiveDataTestUtil.getValue(repository.getUserLiveData()));
+    }
+    @Test
+    public void registerUserWithEmail_success_callsUpdateProfileWithNameAndSurname() {
+        String email = "jola@prueba.com";
+        String password = "password";
+        String name = "John";
+        String surname = "Doe";
+
+        Task<AuthResult> mockTask = mock(Task.class);
+        when(mockAuth.createUserWithEmailAndPassword(email, password)).thenReturn(mockTask);
+        when(mockTask.isSuccessful()).thenReturn(true);
+
+        FirebaseUser mockUser = mock(FirebaseUser.class);
+        when(mockAuth.getCurrentUser()).thenReturn(mockUser);
+
+        ArgumentCaptor<OnCompleteListener<AuthResult>> captor = ArgumentCaptor.forClass(OnCompleteListener.class);
+        when(mockTask.addOnCompleteListener(captor.capture())).thenReturn(mockTask);
+
+        repository.registerUserWithEmail(email, password, name, surname);
+
+        captor.getValue().onComplete(mockTask);
+
+        ArgumentCaptor<UserProfileChangeRequest> profileCaptor = ArgumentCaptor.forClass(UserProfileChangeRequest.class);
+        verify(mockUser).updateProfile(profileCaptor.capture());
+        assertEquals("John Doe", profileCaptor.getValue().getDisplayName());
+    }
+
 }
