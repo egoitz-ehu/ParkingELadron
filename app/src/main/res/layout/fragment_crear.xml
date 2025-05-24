@@ -137,7 +137,7 @@
         android:id="@+id/btnCrear"
         android:layout_width="match_parent"
         android:layout_height="72dp"
-        android:text="@string/login_enter"
+        android:text="@string/crear_reserrva"
         app:layout_constraintTop_toBottomOf="@+id/spinner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

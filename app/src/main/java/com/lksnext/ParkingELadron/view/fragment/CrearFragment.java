@@ -16,12 +16,12 @@ import android.widget.DatePicker;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentCrearBinding;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
 
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -42,17 +42,15 @@ public class CrearFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Configura el DatePicker para seleccionar la fecha
         binding.cvDia.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
             int dia = c.get(Calendar.DAY_OF_MONTH);
             int mes = c.get(Calendar.MONTH);
             int year = c.get(Calendar.YEAR);
-            DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+            DatePickerDialog.OnDateSetListener listener = (datePicker, i, i1, i2) ->
                     viewModel.setDate(new GregorianCalendar(i, i1, i2).getTime());
-                }
-            };
             DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), listener, year, mes, dia);
             datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
             Calendar maxDate = Calendar.getInstance();
@@ -61,48 +59,43 @@ public class CrearFragment extends Fragment {
             datePickerDialog.show();
         });
 
-        binding.cvHoraInicio.setOnClickListener(v->{
+        // Configura el TimePicker para seleccionar la hora de inicio
+        binding.cvHoraInicio.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
             int hora = c.get(Calendar.HOUR_OF_DAY);
             int minute = c.get(Calendar.MINUTE);
-            TimePickerDialog.OnTimeSetListener listener = new TimePickerDialog.OnTimeSetListener() {
-                @Override
-                public void onTimeSet(TimePicker timePicker, int i, int i1) {
+            TimePickerDialog.OnTimeSetListener listener = (timePicker, i, i1) ->
                     viewModel.setHoraInicio(String.format("%02d:%02d", i, i1));
-                }
-            };
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), listener, hora, minute, true);
             timePickerDialog.show();
         });
 
-        binding.cvHoraSalida.setOnClickListener(v->{
-            if(viewModel.getHoraInicio().getValue() != null) {
+        // Configura el TimePicker para seleccionar la hora de salida
+        binding.cvHoraSalida.setOnClickListener(v -> {
+            if (viewModel.getHoraInicio().getValue() != null) {
                 Calendar c = Calendar.getInstance();
                 int hora = c.get(Calendar.HOUR_OF_DAY);
                 int minute = c.get(Calendar.MINUTE);
-                TimePickerDialog.OnTimeSetListener listener = new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                        int ini1 = Integer.parseInt(viewModel.getHoraInicio().getValue().split(":")[0]);
-                        int ini2 = Integer.parseInt(viewModel.getHoraInicio().getValue().split(":")[1]);
-                        Calendar cIni = Calendar.getInstance();
-                        cIni.set(Calendar.HOUR_OF_DAY, ini1);
-                        cIni.set(Calendar.MINUTE, ini2);
-                        Calendar cFin = Calendar.getInstance();
-                        cFin.set(Calendar.HOUR_OF_DAY, i);
-                        cFin.set(Calendar.MINUTE, i1);
-                        if(cFin.before(cIni)){
-                            cFin.add(Calendar.DAY_OF_MONTH,1);
-                        }
-                        long diferenciaMillis = cFin.getTimeInMillis() - cIni.getTimeInMillis();
-                        long diferenciaHoras = diferenciaMillis / (1000 * 60 * 60);
-                        long diferenciaMinutos = (diferenciaMillis / (1000 * 60)) % 60;
+                TimePickerDialog.OnTimeSetListener listener = (timePicker, i, i1) -> {
+                    int ini1 = Integer.parseInt(viewModel.getHoraInicio().getValue().split(":")[0]);
+                    int ini2 = Integer.parseInt(viewModel.getHoraInicio().getValue().split(":")[1]);
+                    Calendar cIni = Calendar.getInstance();
+                    cIni.set(Calendar.HOUR_OF_DAY, ini1);
+                    cIni.set(Calendar.MINUTE, ini2);
+                    Calendar cFin = Calendar.getInstance();
+                    cFin.set(Calendar.HOUR_OF_DAY, i);
+                    cFin.set(Calendar.MINUTE, i1);
+                    if (cFin.before(cIni)) {
+                        cFin.add(Calendar.DAY_OF_MONTH, 1);
+                    }
+                    long diferenciaMillis = cFin.getTimeInMillis() - cIni.getTimeInMillis();
+                    long diferenciaHoras = diferenciaMillis / (1000 * 60 * 60);
+                    long diferenciaMinutos = (diferenciaMillis / (1000 * 60)) % 60;
 
-                        if (diferenciaHoras < 9 || (diferenciaHoras == 9 && diferenciaMinutos <= 0)) {
-                            viewModel.setHoraFin(String.format("%02d:%02d", i, i1));
-                        } else {
-                            Toast.makeText(getContext(), "La reserva puede ser máximo de 9 horas", Toast.LENGTH_SHORT).show();
-                        }
+                    if (diferenciaHoras < 9 || (diferenciaHoras == 9 && diferenciaMinutos <= 0)) {
+                        viewModel.setHoraFin(String.format("%02d:%02d", i, i1));
+                    } else {
+                        Toast.makeText(getContext(), "La reserva puede ser máximo de 9 horas", Toast.LENGTH_SHORT).show();
                     }
                 };
                 TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), listener, hora, minute, true);
@@ -110,33 +103,39 @@ public class CrearFragment extends Fragment {
             }
         });
 
+        // Observa los cambios en la fecha
         viewModel.getDate().observe(getViewLifecycleOwner(), date -> {
-            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-            binding.tvDia.setText(format.format(date));
+            if (date != null) {
+                SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+                binding.tvDia.setText(format.format(date));
+            } else {
+                binding.tvDia.setText(""); // Limpiar el campo si la fecha es null
+            }
         });
 
-        viewModel.getHoraInicio().observe(getViewLifecycleOwner(), horaInicio -> {
-            binding.tvHoraInicio.setText(horaInicio);
-        });
+        // Observa los cambios en la hora de inicio
+        viewModel.getHoraInicio().observe(getViewLifecycleOwner(), horaInicio ->
+                binding.tvHoraInicio.setText(horaInicio));
 
-        viewModel.getHoraFin().observe(getViewLifecycleOwner(), horaFin -> {
-            binding.tvHoraSalida.setText(horaFin);
-        });
+        // Observa los cambios en la hora de salida
+        viewModel.getHoraFin().observe(getViewLifecycleOwner(), horaFin ->
+                binding.tvHoraSalida.setText(horaFin));
 
+        // Configura el spinner para seleccionar el tipo de plaza
         String[] opciones = {
                 getString(R.string.op_normal),
                 getString(R.string.op_electrico),
                 getString(R.string.op_minusvalido),
                 getString(R.string.op_moto)
         };
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_selected_item, opciones);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), R.layout.spinner_selected_item, opciones);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinner.setAdapter(adapter);
         binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                int pos =adapterView.getSelectedItemPosition();
-                switch (pos){
+                int pos = adapterView.getSelectedItemPosition();
+                switch (pos) {
                     case 0:
                         viewModel.setType(TiposPlaza.NORMAL);
                         break;
@@ -154,12 +153,35 @@ public class CrearFragment extends Fragment {
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
 
-        binding.btnCrear.setOnClickListener(v->{
-            viewModel.crearReserva();
+        // Configura el botón para crear la reserva
+        binding.btnCrear.setOnClickListener(v -> {
+            viewModel.crearReserva(FirebaseAuth.getInstance().getUid()); // Pasa un userId ficticio
+
+            // Observa si la reserva fue creada con éxito
+            viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
+                if (isCreated) {
+                    Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
+                    resetForm(); // Restablece los campos para permitir crear otra reserva
+                } else {
+                    String error = viewModel.getErrorMessage().getValue();
+                    Toast.makeText(getContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
+    }
+
+    // Restablece los campos del formulario y el ViewModel
+    private void resetForm() {
+        viewModel.setDate(null);
+        viewModel.setHoraInicio("");
+        viewModel.setHoraFin("");
+
+        binding.tvDia.setText("");
+        binding.tvHoraInicio.setText("");
+        binding.tvHoraSalida.setText("");
+        binding.spinner.setSelection(0);
     }
 }
