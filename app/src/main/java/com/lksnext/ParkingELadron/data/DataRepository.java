@@ -173,7 +173,7 @@ public class DataRepository {
                 .addOnFailureListener(e -> listener.onReservationFailed("Error al buscar parkings: " + e.getMessage()));
     }
 
-    private void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, OnReservationCompleteListener listener) {
+    public void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, OnReservationCompleteListener listener) {
         // Crear los datos de la reserva
         Map<String, Object> reservationData = new HashMap<>();
         reservationData.put("userId", userId);
@@ -196,7 +196,7 @@ public class DataRepository {
     }
 
 
-    private void updateSpotWithReservation(String parkingId, String spotId, String reservationId, String day, String startTime, String endTime, OnReservationCompleteListener listener) {
+    public void updateSpotWithReservation(String parkingId, String spotId, String reservationId, String day, String startTime, String endTime, OnReservationCompleteListener listener) {
         // Crear la entrada de la reserva
         Map<String, Object> reservationEntry = new HashMap<>();
         reservationEntry.put("reservationId", reservationId);

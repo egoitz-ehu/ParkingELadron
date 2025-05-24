@@ -22,7 +22,11 @@ public class CrearViewModel extends ViewModel {
     private final DataRepository dataRepository;
 
     public CrearViewModel() {
-        dataRepository = new DataRepository(); // Inicializa el repositorio
+        this(new DataRepository());
+    }
+
+    public CrearViewModel(DataRepository r) {
+        dataRepository = r;
     }
 
     public LiveData<Date> getDate() {
