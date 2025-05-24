@@ -1,5 +1,6 @@
 package com.lksnext.ParkingELadron.view.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -29,6 +30,7 @@ public class ProfileFragment extends Fragment {
         return binding.getRoot();
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -40,6 +42,10 @@ public class ProfileFragment extends Fragment {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 requireActivity().finish();
+            } else {
+                binding.tvName.setText(getString(R.string.perfil_name)+user.getDisplayName().split(" ")[0]);
+                binding.tvSurname.setText(getString(R.string.perfil_surname)+user.getDisplayName().split(" ")[1]);
+                binding.tvEmail.setText(getString(R.string.perfil_email)+user.getEmail());
             }
         });
     }
