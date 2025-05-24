@@ -41,10 +41,9 @@ jacoco {
 }
 
 dependencies {
-
+    // AndroidX libraries
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
-
     implementation 'androidx.navigation:navigation-fragment:2.7.6'
     implementation 'androidx.navigation:navigation-ui:2.7.6'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -53,20 +52,23 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation libs.activity
 
+    // Firebase using BOM for dependency management
+    implementation platform('com.google.firebase:firebase-bom:32.2.0') // Updated to the latest version
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    // Unit Testing libraries
     testImplementation 'junit:junit:4.+'
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation 'org.mockito:mockito-core:5.18.0'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
 
+    // Android Instrumentation Testing libraries
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'androidx.test:rules:1.5.0'
-
-    implementation platform('com.google.firebase:firebase-bom:31.1.1')
-    implementation 'com.google.firebase:firebase-auth-ktx'
-    implementation 'com.google.firebase:firebase-firestore-ktx'
-    implementation 'com.google.firebase:firebase-analytics-ktx'
 }
 
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {

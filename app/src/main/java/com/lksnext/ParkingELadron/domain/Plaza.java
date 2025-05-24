@@ -1,26 +1,51 @@
 package com.lksnext.ParkingELadron.domain;
 
 public class Plaza {
-    int id;
-    private TiposPlaza tipo;
-    public Plaza(int id, TiposPlaza tipo){
+    private String id;
+    private TiposPlaza type;
+    private boolean isOccupied;
+    private String occupantId;
+
+    // Constructor vacío requerido por Firebase
+    public Plaza() {}
+
+    public Plaza(String id, TiposPlaza type, boolean isOccupied, String occupantId) {
         this.id = id;
-        this.tipo = tipo;
+        this.type = type;
+        this.isOccupied = isOccupied;
+        this.occupantId = occupantId;
     }
 
-    public TiposPlaza getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TiposPlaza tipo) {
-        this.tipo = tipo;
-    }
-
-    public int getId() {
+    // Getters y Setters
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public TiposPlaza getType() {
+        return type;
+    }
+
+    public void setType(TiposPlaza type) {
+        this.type = type;
+    }
+
+    public boolean isOccupied() {
+        return isOccupied;
+    }
+
+    public void setOccupied(boolean occupied) {
+        isOccupied = occupied;
+    }
+
+    public String getOccupantId() {
+        return occupantId;
+    }
+
+    public void setOccupantId(String occupantId) {
+        this.occupantId = occupantId;
     }
 }
