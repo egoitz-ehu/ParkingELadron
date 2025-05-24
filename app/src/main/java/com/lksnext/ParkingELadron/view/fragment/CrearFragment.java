@@ -109,17 +109,27 @@ public class CrearFragment extends Fragment {
                 SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                 binding.tvDia.setText(format.format(date));
             } else {
-                binding.tvDia.setText(""); // Limpiar el campo si la fecha es null
+                binding.tvDia.setText(getString(R.string.crear_selectDia)); // Limpiar el campo si la fecha es null
             }
         });
 
         // Observa los cambios en la hora de inicio
-        viewModel.getHoraInicio().observe(getViewLifecycleOwner(), horaInicio ->
-                binding.tvHoraInicio.setText(horaInicio));
+        viewModel.getHoraInicio().observe(getViewLifecycleOwner(), horaInicio -> {
+            if (horaInicio != null) {
+                binding.tvHoraInicio.setText(horaInicio);
+            } else {
+                binding.tvHoraInicio.setText(getString(R.string.crear_selectHoraEntrada)); // Limpiar el campo si la hora de inicio es null
+            }
+        });
 
         // Observa los cambios en la hora de salida
-        viewModel.getHoraFin().observe(getViewLifecycleOwner(), horaFin ->
-                binding.tvHoraSalida.setText(horaFin));
+        viewModel.getHoraFin().observe(getViewLifecycleOwner(), horaFin ->{
+            if (horaFin != null) {
+                binding.tvHoraSalida.setText(horaFin);
+            } else {
+                binding.tvHoraSalida.setText(getString(R.string.crear_selectHoraEntrada)); // Limpiar el campo si la hora de salida es null
+            }
+        });
 
         // Configura el spinner para seleccionar el tipo de plaza
         String[] opciones = {
@@ -179,9 +189,6 @@ public class CrearFragment extends Fragment {
         viewModel.setHoraInicio("");
         viewModel.setHoraFin("");
 
-        binding.tvDia.setText("");
-        binding.tvHoraInicio.setText("");
-        binding.tvHoraSalida.setText("");
         binding.spinner.setSelection(0);
     }
 }
