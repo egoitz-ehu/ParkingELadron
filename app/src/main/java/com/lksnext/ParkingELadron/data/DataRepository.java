@@ -22,7 +22,11 @@ public class DataRepository {
     private final FirebaseFirestore firestore;
 
     public DataRepository() {
-        firestore = FirebaseFirestore.getInstance();
+        this(FirebaseFirestore.getInstance());
+    }
+
+    public DataRepository(FirebaseFirestore firestore) {
+        this.firestore = firestore;
     }
 
     public LiveData<Boolean> isDatabaseInitialized() {
@@ -213,7 +217,7 @@ public class DataRepository {
                 .addOnFailureListener(e -> listener.onReservationFailed("Error al actualizar la plaza: " + e.getMessage()));
     }
 
-    private boolean isSpotAvailable(List<Map<String, Object>> reservations, String day, String startTime, String endTime) {
+    public boolean isSpotAvailable(List<Map<String, Object>> reservations, String day, String startTime, String endTime) {
         if (reservations == null || reservations.isEmpty()) {
             return true;
         }
@@ -231,7 +235,7 @@ public class DataRepository {
         return true;
     }
 
-    private boolean timeOverlaps(String start1, String end1, String start2, String end2) {
+    public boolean timeOverlaps(String start1, String end1, String start2, String end2) {
         // Si el intervalo 1 termina antes de que comience el intervalo 2
         if (end1.compareTo(start2) <= 0) {
             return false;
