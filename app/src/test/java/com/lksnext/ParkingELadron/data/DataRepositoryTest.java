@@ -1,5 +1,6 @@
 package com.lksnext.ParkingELadron.data;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,8 +19,21 @@ public class DataRepositoryTest {
 
     @Before
     public void setUp() {
+        // Limpia el singleton antes de cada test
+        DataRepository.resetInstance();
+
+        // Crea el mock de Firestore
         mockFirestore = mock(FirebaseFirestore.class);
-        dataRepository = new DataRepository(mockFirestore); // Assuming this is the class where isSpotAvailable is defined
+
+        // Crea la instancia singleton con el mock
+        DataRepository.setInstance(DataRepository.createForTest(mockFirestore));
+        dataRepository = DataRepository.getInstance();
+    }
+
+    @After
+    public void tearDown() {
+        // Limpia el singleton después de cada test para evitar efectos colaterales
+        DataRepository.resetInstance();
     }
 
     @Test

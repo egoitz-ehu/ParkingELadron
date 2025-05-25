@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
@@ -12,18 +13,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.lksnext.ParkingELadron.databinding.FragmentReservasBinding;
-import com.lksnext.ParkingELadron.domain.EstadoReserva;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.view.adapters.ReservaAdapter;
+import com.lksnext.ParkingELadron.viewmodel.ReservasViewModel;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class ReservasFragment extends Fragment {
 
     private FragmentReservasBinding binding;
+    private ReservasViewModel viewModel;
+    private ReservaAdapter reservaAdapter;
 
     public ReservasFragment() {
         // Required empty public constructor
@@ -33,21 +34,34 @@ public class ReservasFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentReservasBinding.inflate(inflater, container, false);
+        viewModel = new ViewModelProvider(requireActivity()).get(ReservasViewModel.class);
         return binding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         binding.recyclerViewReservas.setLayoutManager(new LinearLayoutManager(getContext()));
-        Reserva r1 = new Reserva(new Date(), "15:30", "17:00",null, "1", EstadoReserva.Cancelado);
-        Reserva r2 = new Reserva(new Date(), "15:30", "17:00",null, "1",EstadoReserva.Finalizado);
-        Reserva r3 = new Reserva(new Date(), "15:30", "17:00",null, "1",EstadoReserva.Reservado);
-        Reserva r4 = new Reserva(new Date(), "15:30", "17:00",null, "1",EstadoReserva.Cancelado);
-        List<Reserva> reservaList = new ArrayList<Reserva>();
-        reservaList.add(r1);
-        reservaList.add(r2);
-        reservaList.add(r3);
-        reservaList.add(r4);
-        binding.recyclerViewReservas.setAdapter(new ReservaAdapter(reservaList));
+        reservaAdapter = new ReservaAdapter(new ArrayList<>());
+        binding.recyclerViewReservas.setAdapter(reservaAdapter);
+
+        binding.swipeLayout.setOnRefreshListener(()->{
+            viewModel.reloadReservas();
+        });
+
+        // Observa el LiveData del ViewModel
+        viewModel.getReservas().observe(getViewLifecycleOwner(), reservas -> {
+            System.out.println("Datos conseguidos");
+            if(reservas != null) {
+                reservaAdapter.setReservaList(reservas); // Actualiza la lista en el adapter
+            } else {
+                reservaAdapter.setReservaList(List.of()); // Si la lista es nula, muestra una lista vacía
+            }
+            binding.swipeLayout.setRefreshing(false);
+        });
+
+        if (viewModel.getReservas().getValue() == null || viewModel.getReservas().getValue().isEmpty()) {
+            binding.swipeLayout.setRefreshing(true); // Muestra el spinner inicial
+            viewModel.reloadReservas();
+        }
     }
 }

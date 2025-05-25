@@ -22,7 +22,7 @@ public class CrearViewModel extends ViewModel {
     private final DataRepository dataRepository;
 
     public CrearViewModel() {
-        this(new DataRepository());
+        this(DataRepository.getInstance());
     }
 
     public CrearViewModel(DataRepository r) {

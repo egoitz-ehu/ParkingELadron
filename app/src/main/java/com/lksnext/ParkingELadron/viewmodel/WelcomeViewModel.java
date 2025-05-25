@@ -10,7 +10,7 @@ public class WelcomeViewModel extends ViewModel {
     private final DataRepository parkingRepository;
 
     public WelcomeViewModel() {
-        parkingRepository = new DataRepository();
+        parkingRepository = DataRepository.getInstance();
     }
 
     // Exponer el estado de inicialización de la base de datos

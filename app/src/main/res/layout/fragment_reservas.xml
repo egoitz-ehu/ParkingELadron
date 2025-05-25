@@ -6,10 +6,14 @@
     tools:context=".view.fragment.ReservasFragment"
     android:background="@drawable/reservas_bg">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewReservas"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewReservas"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>

@@ -16,6 +16,8 @@ import com.lksnext.ParkingELadron.domain.Plaza;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,17 +25,37 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataRepository {
-
+    private static DataRepository instance;
     private final FirebaseFirestore firestore;
 
-    private MutableLiveData<List<Reserva>> reservationsLiveData = new MutableLiveData<>();
+    private MutableLiveData<List<Reserva>> reservationsLiveData;
 
-    public DataRepository() {
-        this(FirebaseFirestore.getInstance());
+    private DataRepository(FirebaseFirestore firestore) {
+        this.firestore = firestore;
+        reservationsLiveData = new MutableLiveData<>();
     }
 
-    public DataRepository(FirebaseFirestore firestore) {
-        this.firestore = firestore;
+    // Singleton para producción
+    public static synchronized DataRepository getInstance() {
+        if (instance == null) {
+            instance = new DataRepository(FirebaseFirestore.getInstance());
+        }
+        return instance;
+    }
+
+    // Usar este método para inyectar instancia en tests
+    public static synchronized void setInstance(DataRepository repo) {
+        instance = repo;
+    }
+
+    // (Opcional) Resetear para tests
+    public static synchronized void resetInstance() {
+        instance = null;
+    }
+
+    //Para tests
+    public static DataRepository createForTest(FirebaseFirestore mockFirestore) {
+        return new DataRepository(mockFirestore);
     }
 
     public LiveData<Boolean> isDatabaseInitialized() {
@@ -271,19 +293,25 @@ public class DataRepository {
                         QuerySnapshot querySnapshot = task.getResult();
                         List<DocumentSnapshot> documents = querySnapshot.getDocuments();
                         List<Reserva> reservations = new ArrayList<>();
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                         for(DocumentSnapshot doc:documents) {
-                            reservations.add(new Reserva(
-                                    doc.getDate("date"),
-                                    doc.getString("startTime"),
-                                    doc.getString("endTime"),
-                                    new Plaza(doc.getString("spotId"), TiposPlaza.valueOf(doc.getString("type"))),
-                                    doc.getString("userId"),
-                                    EstadoReserva.valueOf(doc.getString("state"))
-                            ));
+                            try {
+                                reservations.add(new Reserva(
+                                        format.parse(doc.getString("day")),
+                                        doc.getString("startTime"),
+                                        doc.getString("endTime"),
+                                        new Plaza(doc.getString("spotId"), TiposPlaza.valueOf(doc.getString("spotType"))),
+                                        doc.getString("userId"),
+                                        EstadoReserva.valueOf(doc.getString("state"))
+                                ));
+                            } catch (ParseException e) {
+                                System.out.println("Problema al parsear date");
+                            }
                         }
                         reservationsLiveData.setValue(reservations);
                     }
                 });
+        System.out.println("Datos conseguidos db");
     }
 
     public LiveData<List<Reserva>> getReservationsLiveData() {
