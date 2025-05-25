@@ -1,26 +1,23 @@
 package com.lksnext.ParkingELadron.data;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-
-import java.util.concurrent.Executor;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class AuthRepository {
     private FirebaseAuth firebaseAuth;
+    private FirebaseFirestore firestore;
 
-    public AuthRepository(FirebaseAuth auth) {
+    public AuthRepository(FirebaseAuth auth, FirebaseFirestore firestore) {
         this.firebaseAuth = auth;
+        this.firestore = firestore;
     }
     public AuthRepository() {
-        this(FirebaseAuth.getInstance());
+        this(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance());
     }
 
     private MutableLiveData<FirebaseUser> userLiveData = new MutableLiveData<>();
@@ -31,7 +28,19 @@ public class AuthRepository {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
-                        userLiveData.postValue(user);
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(name + " " + surname) // Establecer el nombre completo
+                                .build();
+                        assert user != null;
+                        user.updateProfile(profileUpdates)
+                                .addOnCompleteListener(profileTask -> {
+                                    if (profileTask.isSuccessful()) {
+                                        userLiveData.postValue(user);
+                                    } else {
+                                        // Manejar errores al actualizar el perfil
+                                        errorLiveData.postValue(profileTask.getException().getMessage());
+                                    }
+                                });
                     } else {
                         errorLiveData.postValue(task.getException().getMessage());
                     }
@@ -53,6 +62,10 @@ public class AuthRepository {
     public void signOut(){
         firebaseAuth.signOut();
         userLiveData.setValue(null);
+    }
+
+    public void getUserFromDatabase(){
+        this.userLiveData.setValue(firebaseAuth.getCurrentUser());
     }
 
     public LiveData<FirebaseUser> getUserLiveData(){
