@@ -4,14 +4,19 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.lksnext.ParkingELadron.domain.EstadoReserva;
 import com.lksnext.ParkingELadron.domain.Plaza;
+import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DataRepository {
 
     private final FirebaseFirestore firestore;
+
+    private MutableLiveData<List<Reserva>> reservationsLiveData = new MutableLiveData<>();
 
     public DataRepository() {
         this(FirebaseFirestore.getInstance());
@@ -86,25 +93,25 @@ public class DataRepository {
     private void generateParkingSpots(WriteBatch batch, DocumentReference parkingRef) {
         for (int i = 1; i <= 8; i++) {
             DocumentReference spotRef = parkingRef.collection("parkingSpots").document("normal" + i);
-            Plaza plaza = new Plaza("normal" + i, TiposPlaza.NORMAL, false, null);
+            Plaza plaza = new Plaza("normal" + i, TiposPlaza.NORMAL);
             batch.set(spotRef, plaza);
         }
 
         for (int i = 1; i <= 2; i++) {
             DocumentReference spotRef = parkingRef.collection("parkingSpots").document("moto" + i);
-            Plaza plaza = new Plaza("moto" + i, TiposPlaza.MOTO, false, null);
+            Plaza plaza = new Plaza("moto" + i, TiposPlaza.MOTO);
             batch.set(spotRef, plaza);
         }
 
         for (int i = 1; i <= 3; i++) {
             DocumentReference spotRef = parkingRef.collection("parkingSpots").document("electrico" + i);
-            Plaza plaza = new Plaza("electrico" + i, TiposPlaza.ELECTRICO, false, null);
+            Plaza plaza = new Plaza("electrico" + i, TiposPlaza.ELECTRICO);
             batch.set(spotRef, plaza);
         }
 
         for (int i = 1; i <= 2; i++) {
             DocumentReference spotRef = parkingRef.collection("parkingSpots").document("accesible" + i);
-            Plaza plaza = new Plaza("accesible" + i, TiposPlaza.ACCESIBLE, false, null);
+            Plaza plaza = new Plaza("accesible" + i, TiposPlaza.ACCESIBLE);
             batch.set(spotRef, plaza);
         }
     }
@@ -131,7 +138,6 @@ public class DataRepository {
                                 .document(parkingId)
                                 .collection("parkingSpots")
                                 .whereEqualTo("type", type)
-                                .whereEqualTo("isOccupied", false) // Solo plazas no ocupadas
                                 .get()
                                 .addOnSuccessListener(spotsQuerySnapshot -> {
                                     if (spotsQuerySnapshot.isEmpty()) {
@@ -148,7 +154,7 @@ public class DataRepository {
                                         // Verificar disponibilidad de la plaza
                                         if (isSpotAvailable(reservations, day, startTime, endTime)) {
                                             reservationCreated.set(true); // Marcar que se encontró una plaza
-                                            createReservation(parkingId, spotDoc.getId(), day, startTime, endTime, userId, listener);
+                                            createReservation(parkingId, spotDoc.getId(), day, startTime, endTime, userId, type, listener);
                                             return; // Salir del flujo
                                         }
                                     }
@@ -173,7 +179,7 @@ public class DataRepository {
                 .addOnFailureListener(e -> listener.onReservationFailed("Error al buscar parkings: " + e.getMessage()));
     }
 
-    public void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, OnReservationCompleteListener listener) {
+    public void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, String type, OnReservationCompleteListener listener) {
         // Crear los datos de la reserva
         Map<String, Object> reservationData = new HashMap<>();
         reservationData.put("userId", userId);
@@ -182,6 +188,8 @@ public class DataRepository {
         reservationData.put("endTime", endTime);
         reservationData.put("parkingId", parkingId);
         reservationData.put("spotId", spotId);
+        reservationData.put("spotType", type);
+        reservationData.put("state", EstadoReserva.Reservado.toString());
 
         // Agregar la reserva a la colección global
         firestore.collection("reservations")
@@ -210,7 +218,6 @@ public class DataRepository {
                 .collection("parkingSpots")
                 .document(spotId)
                 .update(
-                        "isOccupied", true,
                         "reservations", FieldValue.arrayUnion(reservationEntry)
                 )
                 .addOnSuccessListener(aVoid -> listener.onReservationSuccess(parkingId, spotId, reservationId))
@@ -253,5 +260,33 @@ public class DataRepository {
     public interface OnReservationCompleteListener {
         void onReservationSuccess(String parkingId, String spotId, String reservationId);
         void onReservationFailed(String errorMessage);
+    }
+
+    public void getUserReservations(String userId) {
+        firestore.collection("reservations")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        List<DocumentSnapshot> documents = querySnapshot.getDocuments();
+                        List<Reserva> reservations = new ArrayList<>();
+                        for(DocumentSnapshot doc:documents) {
+                            reservations.add(new Reserva(
+                                    doc.getDate("date"),
+                                    doc.getString("startTime"),
+                                    doc.getString("endTime"),
+                                    new Plaza(doc.getString("spotId"), TiposPlaza.valueOf(doc.getString("type"))),
+                                    doc.getString("userId"),
+                                    EstadoReserva.valueOf(doc.getString("state"))
+                            ));
+                        }
+                        reservationsLiveData.setValue(reservations);
+                    }
+                });
+    }
+
+    public LiveData<List<Reserva>> getReservationsLiveData() {
+        return reservationsLiveData;
     }
 }
