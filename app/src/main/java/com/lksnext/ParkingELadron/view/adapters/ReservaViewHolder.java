@@ -19,7 +19,7 @@ public class ReservaViewHolder extends RecyclerView.ViewHolder {
         this.binding = binding;
     }
 
-    public void bind(Reserva reserva){
+    public void bind(Reserva reserva, OnItemClickListener listener){
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
         binding.tvDate.setText(format.format(reserva.getFecha()));
         binding.tvHour.setText(reserva.getHoraInicio() + "-" + reserva.getHoraFin());
@@ -35,7 +35,11 @@ public class ReservaViewHolder extends RecyclerView.ViewHolder {
                 binding.tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.reservaFinalizado));
         }
         binding.getRoot().setOnClickListener(v->{
-            Toast.makeText(v.getContext(), "Reserva seleccionado", Toast.LENGTH_SHORT).show();
+            listener.onItemClick(reserva);
         });
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(Reserva reserva);
     }
 }

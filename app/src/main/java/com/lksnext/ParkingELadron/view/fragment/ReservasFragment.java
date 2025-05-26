@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import com.lksnext.ParkingELadron.databinding.FragmentReservasBinding;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.view.adapters.ReservaAdapter;
+import com.lksnext.ParkingELadron.view.dialog.ReservaDialog;
 import com.lksnext.ParkingELadron.viewmodel.ReservasViewModel;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class ReservasFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         binding.recyclerViewReservas.setLayoutManager(new LinearLayoutManager(getContext()));
-        reservaAdapter = new ReservaAdapter(new ArrayList<>());
+        reservaAdapter = new ReservaAdapter(new ArrayList<>(), this::verDatos);
         binding.recyclerViewReservas.setAdapter(reservaAdapter);
 
         binding.swipeLayout.setOnRefreshListener(()->{
@@ -63,5 +64,10 @@ public class ReservasFragment extends Fragment {
             binding.swipeLayout.setRefreshing(true); // Muestra el spinner inicial
             viewModel.reloadReservas();
         }
+    }
+
+    private void verDatos(Reserva reserva) {
+        ReservaDialog dialog = new ReservaDialog(requireContext(),reserva);
+        dialog.show();
     }
 }

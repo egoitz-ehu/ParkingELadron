@@ -10,4 +10,6 @@
     <color name="reservaCancelado">#F13C36</color>
     <color name="reservaFinalizado">#F4B224</color>
 
+    <color name="eliminarReserva">#F12222</color>
+
 </resources>

@@ -16,6 +16,7 @@ import com.lksnext.ParkingELadron.domain.Plaza;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -221,6 +222,12 @@ public class DataRepository {
 
                     // Actualizar la plaza con la nueva reserva
                     updateSpotWithReservation(parkingId, spotId, reservationId, day, startTime, endTime, listener);
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                    try {
+                        this.reservationsLiveData.getValue().add(new Reserva(format.parse(day), startTime, endTime, new Plaza(spotId, TiposPlaza.valueOf(type)), userId, EstadoReserva.Reservado));
+                    } catch (ParseException e) {
+                        System.out.println("Problema de parseo");
+                    }
                 })
                 .addOnFailureListener(e -> listener.onReservationFailed("Error al crear la reserva en la colección global: " + e.getMessage()));
     }

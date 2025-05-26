@@ -15,8 +15,11 @@ import java.util.List;
 public class ReservaAdapter extends RecyclerView.Adapter<ReservaViewHolder> {
     private List<Reserva> reservaList;
 
-    public ReservaAdapter(List<Reserva> rList) {
+    private ReservaViewHolder.OnItemClickListener listener;
+
+    public ReservaAdapter(List<Reserva> rList, ReservaViewHolder.OnItemClickListener listener) {
         this.reservaList = (rList != null) ? rList : new ArrayList<>();
+        this.listener = listener;
     }
 
     @NonNull
@@ -30,7 +33,7 @@ public class ReservaAdapter extends RecyclerView.Adapter<ReservaViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ReservaViewHolder holder, int position) {
         Reserva reserva = reservaList.get(position);
-        holder.bind(reserva);
+        holder.bind(reserva, listener);
     }
 
     @Override
