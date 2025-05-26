@@ -67,7 +67,18 @@ public class ReservasFragment extends Fragment {
     }
 
     private void verDatos(Reserva reserva) {
-        ReservaDialog dialog = new ReservaDialog(requireContext(),reserva);
+        ReservaDialog dialog = new ReservaDialog(requireContext(),reserva, new ReservaDialog.OnDialogActionListener() {
+
+            @Override
+            public void onEditReservation() {
+
+            }
+
+            @Override
+            public void onDeleteReservation() {
+
+            }
+        });
         dialog.show();
     }
 }

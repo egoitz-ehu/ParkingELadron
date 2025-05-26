@@ -224,7 +224,7 @@ public class DataRepository {
                     updateSpotWithReservation(parkingId, spotId, reservationId, day, startTime, endTime, listener);
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                     try {
-                        this.reservationsLiveData.getValue().add(new Reserva(format.parse(day), startTime, endTime, new Plaza(spotId, TiposPlaza.valueOf(type)), userId, EstadoReserva.Reservado));
+                        this.reservationsLiveData.getValue().add(new Reserva(format.parse(day), startTime, endTime, new Plaza(spotId, TiposPlaza.valueOf(type)), userId, EstadoReserva.Reservado,reservationId, parkingId));
                     } catch (ParseException e) {
                         System.out.println("Problema de parseo");
                     }
@@ -309,7 +309,9 @@ public class DataRepository {
                                         doc.getString("endTime"),
                                         new Plaza(doc.getString("spotId"), TiposPlaza.valueOf(doc.getString("spotType"))),
                                         doc.getString("userId"),
-                                        EstadoReserva.valueOf(doc.getString("state"))
+                                        EstadoReserva.valueOf(doc.getString("state")),
+                                        doc.getId(),
+                                        doc.getString("parkingId")
                                 ));
                             } catch (ParseException e) {
                                 System.out.println("Problema al parsear date");
@@ -323,5 +325,40 @@ public class DataRepository {
 
     public LiveData<List<Reserva>> getReservationsLiveData() {
         return reservationsLiveData;
+    }
+
+    public void deleteReservation(Reserva reserva, OnReservationRemoveListener listener) {
+        firestore.collection("reservations").document(reserva.getId()).delete()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        System.out.println("Reserva eliminada correctamente");
+                        reservationsLiveData.getValue().removeIf(r -> r.getId().equals(reserva.getId()));
+                        Map<String, Object> reservationEntry = new HashMap<>();
+                        reservationEntry.put("day", reserva.getFecha());
+                        reservationEntry.put("endTime", reserva.getHoraFin());
+                        reservationEntry.put("reservationId", reserva.getId());
+                        reservationEntry.put("startTime", reserva.getHoraInicio());
+                        firestore.collection("parking")
+                                .document(reserva.getParkingId())
+                                .collection("parkingSpots")
+                                .document(reserva.getPlaza().getId())
+                                .update("reservations", FieldValue.arrayRemove(reservationEntry))
+                                .addOnSuccessListener(aVoid -> {
+                                    listener.onReservationRemoveSuccess();
+                                })
+                                .addOnFailureListener(aVoid -> {
+                                    listener.onReservationRemoveFailed("Error al eliminar reserva");
+                                });
+
+                    }
+                })
+                .addOnFailureListener(aVoid -> {
+                    listener.onReservationRemoveFailed("Error al eliminar reserva");
+                });
+    }
+
+    public interface OnReservationRemoveListener{
+        void onReservationRemoveSuccess();
+        void onReservationRemoveFailed(String msg);
     }
 }

@@ -10,6 +10,10 @@ public class Reserva {
     private String usuarioId;
     private EstadoReserva estado;
 
+    private String id;
+
+    private String parkingId;
+
     public Date getFecha() {
         return fecha;
     }
@@ -58,12 +62,22 @@ public class Reserva {
         this.estado = estado;
     }
 
-    public Reserva(Date fecha, String horaInicio, String horaFin, Plaza plaza, String usuarioId, EstadoReserva estado) {
+    public String getId(){
+        return id;
+    }
+
+    public String getParkingId(){
+        return parkingId;
+    }
+
+    public Reserva(Date fecha, String horaInicio, String horaFin, Plaza plaza, String usuarioId, EstadoReserva estado, String id, String parkingId) {
         this.fecha = fecha;
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
         this.plaza = plaza;
         this.usuarioId = usuarioId;
         this.estado = estado;
+        this.id=id;
+        this.parkingId=parkingId;
     }
 }
