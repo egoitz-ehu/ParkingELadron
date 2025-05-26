@@ -14,6 +14,8 @@ import java.util.List;
 public class ReservasViewModel extends ViewModel {
     private final DataRepository dataRepository;
 
+    private MutableLiveData<String> errorMessageLiveData = new MutableLiveData<>();
+
     public ReservasViewModel() {
         this(DataRepository.getInstance());
     }
@@ -28,5 +30,23 @@ public class ReservasViewModel extends ViewModel {
 
     public void reloadReservas() {
         dataRepository.getUserReservations(FirebaseAuth.getInstance().getUid());
+    }
+
+    public LiveData<String> getErrorMessageLiveData() {
+        return errorMessageLiveData;
+    }
+
+    public void removeReservation(Reserva reserva) {
+        dataRepository.deleteReservation(reserva, new DataRepository.OnReservationRemoveListener() {
+            @Override
+            public void onReservationRemoveSuccess() {
+
+            }
+
+            @Override
+            public void onReservationRemoveFailed(String msg) {
+                errorMessageLiveData.setValue(msg);
+            }
+        });
     }
 }

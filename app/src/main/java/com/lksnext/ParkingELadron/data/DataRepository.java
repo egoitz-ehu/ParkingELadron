@@ -332,12 +332,17 @@ public class DataRepository {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         System.out.println("Reserva eliminada correctamente");
-                        reservationsLiveData.getValue().removeIf(r -> r.getId().equals(reserva.getId()));
+                        List<Reserva> currentList = reservationsLiveData.getValue();
+                        if (currentList != null) {
+                            List<Reserva> updatedList = new ArrayList<>(currentList);
+                            updatedList.removeIf(r -> r.getId().equals(reserva.getId()));
+                            reservationsLiveData.setValue(updatedList);
+                        }
                         Map<String, Object> reservationEntry = new HashMap<>();
-                        reservationEntry.put("day", reserva.getFecha());
-                        reservationEntry.put("endTime", reserva.getHoraFin());
                         reservationEntry.put("reservationId", reserva.getId());
+                        reservationEntry.put("day", new SimpleDateFormat("yyyy-MM-dd").format(reserva.getFecha()));
                         reservationEntry.put("startTime", reserva.getHoraInicio());
+                        reservationEntry.put("endTime", reserva.getHoraFin());
                         firestore.collection("parking")
                                 .document(reserva.getParkingId())
                                 .collection("parkingSpots")

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.lksnext.ParkingELadron.databinding.FragmentReservasBinding;
 import com.lksnext.ParkingELadron.domain.Reserva;
@@ -64,6 +65,10 @@ public class ReservasFragment extends Fragment {
             binding.swipeLayout.setRefreshing(true); // Muestra el spinner inicial
             viewModel.reloadReservas();
         }
+
+        viewModel.getErrorMessageLiveData().observe(requireActivity(), errorMessage -> {
+            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void verDatos(Reserva reserva) {
@@ -76,7 +81,7 @@ public class ReservasFragment extends Fragment {
 
             @Override
             public void onDeleteReservation() {
-
+                viewModel.removeReservation(reserva);
             }
         });
         dialog.show();
