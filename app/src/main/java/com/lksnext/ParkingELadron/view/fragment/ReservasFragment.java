@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentReservasBinding;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.view.adapters.ReservaAdapter;
@@ -54,6 +55,11 @@ public class ReservasFragment extends Fragment {
         viewModel.getReservas().observe(getViewLifecycleOwner(), reservas -> {
             System.out.println("Datos conseguidos");
             if(reservas != null) {
+                if(reservas.isEmpty()){
+                    binding.tvError.setText(getString(R.string.reserva_empty));
+                }else{
+                    binding.tvError.setText("");
+                }
                 reservaAdapter.setReservaList(reservas); // Actualiza la lista en el adapter
             } else {
                 reservaAdapter.setReservaList(List.of()); // Si la lista es nula, muestra una lista vacía

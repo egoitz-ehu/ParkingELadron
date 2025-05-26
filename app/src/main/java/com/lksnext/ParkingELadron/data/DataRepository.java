@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataRepository {
     private static DataRepository instance;
@@ -148,55 +149,45 @@ public class DataRepository {
                         return;
                     }
 
-                    // Bandera para determinar si se encontró una plaza
                     AtomicBoolean reservationCreated = new AtomicBoolean(false);
+                    AtomicInteger pendingParkings = new AtomicInteger(parkingQuerySnapshot.size());
 
                     for (QueryDocumentSnapshot parkingDoc : parkingQuerySnapshot) {
-                        if (reservationCreated.get()) break; // Detener si ya se creó una reserva
+                        if (reservationCreated.get()) break;
 
                         String parkingId = parkingDoc.getId();
 
-                        // Buscar plazas en el parking actual
                         firestore.collection("parking")
                                 .document(parkingId)
                                 .collection("parkingSpots")
                                 .whereEqualTo("type", type)
                                 .get()
                                 .addOnSuccessListener(spotsQuerySnapshot -> {
-                                    if (spotsQuerySnapshot.isEmpty()) {
-                                        // Continuar buscando en otros parkings
-                                        return;
-                                    }
+                                    if (!spotsQuerySnapshot.isEmpty()) {
+                                        for (QueryDocumentSnapshot spotDoc : spotsQuerySnapshot) {
+                                            if (reservationCreated.get()) break;
 
-                                    for (QueryDocumentSnapshot spotDoc : spotsQuerySnapshot) {
-                                        if (reservationCreated.get()) break; // Detener si ya se creó una reserva
+                                            Map<String, Object> spot = spotDoc.getData();
+                                            List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
 
-                                        Map<String, Object> spot = spotDoc.getData();
-                                        List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
-
-                                        // Verificar disponibilidad de la plaza
-                                        if (isSpotAvailable(reservations, day, startTime, endTime)) {
-                                            reservationCreated.set(true); // Marcar que se encontró una plaza
-                                            createReservation(parkingId, spotDoc.getId(), day, startTime, endTime, userId, type, listener);
-                                            return; // Salir del flujo
+                                            if (isSpotAvailable(reservations, day, startTime, endTime)) {
+                                                reservationCreated.set(true);
+                                                createReservation(parkingId, spotDoc.getId(), day, startTime, endTime, userId, type, listener);
+                                                return; // No seguir buscando en este parking
+                                            }
                                         }
                                     }
-
-                                    // Si no se encontró una plaza disponible en este parking, continuar buscando
-                                    if (!reservationCreated.get()) {
+                                    // Si ya hemos terminado este parking, decrementamos el contador
+                                    if (pendingParkings.decrementAndGet() == 0 && !reservationCreated.get()) {
                                         listener.onReservationFailed("No hay plazas disponibles.");
                                     }
                                 })
                                 .addOnFailureListener(e -> {
-                                    if (!reservationCreated.get()) {
+                                    // También decrementa y chequea el contador en caso de error
+                                    if (pendingParkings.decrementAndGet() == 0 && !reservationCreated.get()) {
                                         listener.onReservationFailed("Error al buscar plazas: " + e.getMessage());
                                     }
                                 });
-                    }
-
-                    // Si no se encontró una plaza después de revisar todos los parkings
-                    if (!reservationCreated.get()) {
-                        listener.onReservationFailed("No hay plazas disponibles.");
                     }
                 })
                 .addOnFailureListener(e -> listener.onReservationFailed("Error al buscar parkings: " + e.getMessage()));

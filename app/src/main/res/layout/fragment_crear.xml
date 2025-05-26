@@ -84,6 +84,7 @@
                 android:layout_weight="2"
                 android:focusable="false"
                 android:clickable="false"
+                app:tint="@color/white"
                 />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -118,6 +119,7 @@
                 android:layout_weight="2"
                 android:focusable="false"
                 android:clickable="false"
+                app:tint="@color/white"
                 />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

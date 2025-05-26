@@ -175,10 +175,12 @@ public class CrearFragment extends Fragment {
                 if (isCreated) {
                     Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
                     resetForm(); // Restablece los campos para permitir crear otra reserva
-                } else {
-                    String error = viewModel.getErrorMessage().getValue();
-                    Toast.makeText(getContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
                 }
+
+            });
+
+            viewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
+                if(msg != null)  Toast.makeText(getContext(), "Error: " + msg, Toast.LENGTH_SHORT).show();
             });
         });
     }
@@ -186,9 +188,8 @@ public class CrearFragment extends Fragment {
     // Restablece los campos del formulario y el ViewModel
     private void resetForm() {
         viewModel.setDate(null);
-        viewModel.setHoraInicio("");
-        viewModel.setHoraFin("");
-
+        viewModel.setHoraInicio(null);
+        viewModel.setHoraFin(null);
         binding.spinner.setSelection(0);
     }
 }

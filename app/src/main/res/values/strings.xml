@@ -51,4 +51,6 @@
     <string name="forgot_change">Cambiar contraseña</string>
 
     <string name="change_title">Cambiar contraseña</string>
+
+    <string name="reserva_empty">No tienes reservas. Crea una para empezar.</string>
 </resources>
