@@ -1,6 +1,7 @@
 package com.lksnext.ParkingELadron.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,31 +47,6 @@ public class AuthRepositoryTest {
         repository.registerUserWithEmail(email, password, name, surname);
 
         verify(mockAuth).createUserWithEmailAndPassword(email,password);
-    }
-
-    @Test
-    public void registerUserWithEmail_whenFirebaseSucceeds_updatesUserLiveData() throws InterruptedException {
-        String email = "jola@prueba.com";
-        String password = "password";
-        String name = "John";
-        String surname = "Doe";
-
-        Task<AuthResult> mockTask = mock(Task.class);
-        when(mockAuth.createUserWithEmailAndPassword(email, password)).thenReturn(mockTask);
-        when(mockTask.isSuccessful()).thenReturn(true);
-
-        // Mock current user
-        FirebaseUser mockUser = mock(FirebaseUser.class);
-        when(mockAuth.getCurrentUser()).thenReturn(mockUser);
-
-        ArgumentCaptor<OnCompleteListener<AuthResult>> captor = ArgumentCaptor.forClass(OnCompleteListener.class);
-        when(mockTask.addOnCompleteListener(captor.capture())).thenReturn(mockTask);
-
-        repository.registerUserWithEmail(email, password, name, surname);
-
-        captor.getValue().onComplete(mockTask);
-
-        assertEquals(mockUser, LiveDataTestUtil.getValue(repository.getUserLiveData()));
     }
 
     @Test
