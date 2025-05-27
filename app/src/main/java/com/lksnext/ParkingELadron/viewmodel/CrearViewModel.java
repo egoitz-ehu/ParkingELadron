@@ -106,7 +106,7 @@ public class CrearViewModel extends ViewModel {
                 });
     }
 
-    public void editarReserva(String id) {
+    public void editarReserva(String id, String oldSpot) {
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
             reservaCreada.setValue(false);
@@ -116,7 +116,7 @@ public class CrearViewModel extends ViewModel {
         // Formatea la fecha a un string
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String formattedDate = dateFormat.format(date.getValue());
-        dataRepository.editReservation(id, formattedDate, horaFin.getValue(), "defaultParking", type.getValue(), horaInicio.getValue(), new DataRepository.OnReservationCompleteListener() {
+        dataRepository.editReservation(id, formattedDate, horaFin.getValue(), "defaultParking", type.getValue(), horaInicio.getValue(), oldSpot, new DataRepository.OnReservationCompleteListener() {
             @Override
             public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
                 reservaCreada.setValue(true);

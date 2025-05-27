@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -351,7 +352,7 @@ public class DataRepository {
         void onReservationRemoveFailed(String msg);
     }
 
-    public void editReservation(String oldId, String day, String endTime, String parkingId, TiposPlaza type, String startTime, OnReservationCompleteListener listener) {
+    public void editReservation(String oldId, String day, String endTime, String parkingId, TiposPlaza type, String startTime, String spotId, OnReservationCompleteListener listener) {
         AtomicBoolean reservationCreated = new AtomicBoolean(false);
         firestore.collection("parking")
                 .document(parkingId)
@@ -366,9 +367,9 @@ public class DataRepository {
                             Map<String, Object> spot = spotDoc.getData();
                             List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
 
-                            if (isSpotAvailable(reservations, day, startTime, endTime, null)) {
+                            if (isSpotAvailable(reservations, day, startTime, endTime, oldId)) {
                                 reservationCreated.set(true);
-                                updateReservation(oldId, parkingId, spotDoc.getId(), day, startTime, endTime, type, listener);
+                                updateReservation(oldId, parkingId,spotId, day, startTime, endTime, type, spotDoc.getId(), listener);
                                 return; // No seguir buscando en este parking
                             }
                         }
@@ -384,7 +385,7 @@ public class DataRepository {
                 });
     }
 
-    public void updateReservation(String oldId, String parkingId, String spotId, String day, String startTime, String endTime, TiposPlaza type, OnReservationCompleteListener listener) {
+    public void updateReservation(String oldId, String parkingId, String spotId, String day, String startTime, String endTime, TiposPlaza type, String newSpot, OnReservationCompleteListener listener) {
         firestore.collection("reservations")
                 .document(oldId)
                 .update("day", day, "endTime", endTime, "spotId", spotId, "spotType", type.toString())
@@ -394,10 +395,19 @@ public class DataRepository {
                     reservationEntry.put("day", day);
                     reservationEntry.put("startTime", startTime);
                     reservationEntry.put("endTime", endTime);
+                    reservationEntry.put("spotId", newSpot);
                     deleteSpotReservation(parkingId, spotId, reservationEntry, new OnReservationRemoveListener() {
                         @Override
                         public void onReservationRemoveSuccess() {
-                            updateSpotWithReservation(parkingId, spotId, oldId, day, startTime, endTime, listener);
+                            reservationsLiveData.getValue().removeIf(r -> r.getId().equals(oldId));
+                            Plaza newSpotWithReservation = new Plaza(newSpot, type);
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            try {
+                                reservationsLiveData.getValue().add(new Reserva(format.parse(day), startTime, endTime, newSpotWithReservation, FirebaseAuth.getInstance().getUid(), EstadoReserva.Reservado, oldId, parkingId));
+                            } catch (ParseException e) {
+                                System.out.println("Problema de parseo");
+                            }
+                            updateSpotWithReservation(parkingId, newSpot, oldId, day, startTime, endTime, listener);
                         }
 
                         @Override
@@ -409,6 +419,7 @@ public class DataRepository {
     }
 
     public void deleteSpotReservation(String parkingId, String spotId, Map<String, Object> reservationEntry, OnReservationRemoveListener listener) {
+        System.out.println("Eliminando reserva");
         firestore.collection("parking")
                 .document(parkingId)
                 .collection("parkingSpots")

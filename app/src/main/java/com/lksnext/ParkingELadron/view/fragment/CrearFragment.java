@@ -213,7 +213,7 @@ public class CrearFragment extends Fragment {
                         .setTitle(R.string.editart_btn)
                         .setMessage(R.string.editar_preguntar)
                         .setPositiveButton(R.string.editar_si, (dialog, which) -> {
-                            viewModel.editarReserva(reserva.getId());
+                            viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId());
                         })
                         .setNegativeButton(R.string.editar_no, null)
                         .show();
