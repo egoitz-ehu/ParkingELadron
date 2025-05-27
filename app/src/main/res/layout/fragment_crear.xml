@@ -108,7 +108,7 @@
                 android:id="@+id/tvHoraSalida"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="@string/crear_selectHoraEntrada"
+                android:text="@string/crear_selectHoraSalida"
                 android:textColor="@color/white"
                 android:layout_weight="7"/>
             <ImageButton
@@ -132,8 +132,11 @@
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintBottom_toTopOf="@+id/btnCrear"
-       android:background="@drawable/spinner_bg"
-       android:layout_margin="32dp"/>
+       android:background="@drawable/spinner_white_arrow_bg"
+       android:layout_margin="32dp"
+       android:paddingVertical="8dp"
+       android:foregroundTint="@color/white"
+       />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCrear"

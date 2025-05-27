@@ -25,6 +25,7 @@
     <string name="title_crear">Reservar</string>
     <string name="crear_selectDia">Selecciona un día</string>
     <string name="crear_selectHoraEntrada">Selecciona hora de entrada</string>
+    <string name="crear_selectHoraSalida">Selecciona hora de salida</string>
     <string name="crear_reserrva">Crear reserva</string>
 
     <string name="op_normal">Normal</string>

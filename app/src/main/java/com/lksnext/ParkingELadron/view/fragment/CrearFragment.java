@@ -127,7 +127,7 @@ public class CrearFragment extends Fragment {
             if (horaFin != null) {
                 binding.tvHoraSalida.setText(horaFin);
             } else {
-                binding.tvHoraSalida.setText(getString(R.string.crear_selectHoraEntrada)); // Limpiar el campo si la hora de salida es null
+                binding.tvHoraSalida.setText(getString(R.string.crear_selectHoraSalida)); // Limpiar el campo si la hora de salida es null
             }
         });
 

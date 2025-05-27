@@ -39,11 +39,11 @@ public class DataRepositoryTest {
     @Test
     public void testIsSpotAvailable_NoReservations() {
         // Test when reservations list is null
-        boolean result = dataRepository.isSpotAvailable(null, "2025-05-24", "10:00", "12:00");
+        boolean result = dataRepository.isSpotAvailable(null, "2025-05-24", "10:00", "12:00", null);
         assertTrue(result);
 
         // Test when reservations list is empty
-        result = dataRepository.isSpotAvailable(new ArrayList<>(), "2025-05-24", "10:00", "12:00");
+        result = dataRepository.isSpotAvailable(new ArrayList<>(), "2025-05-24", "10:00", "12:00", null);
         assertTrue(result);
     }
 
@@ -57,7 +57,7 @@ public class DataRepositoryTest {
         reservation.put("endTime", "09:00");
         reservations.add(reservation);
 
-        boolean result = dataRepository.isSpotAvailable(reservations, "2025-05-24", "10:00", "12:00");
+        boolean result = dataRepository.isSpotAvailable(reservations, "2025-05-24", "10:00", "12:00", null);
         assertTrue(result); // No overlap
     }
 
@@ -71,7 +71,7 @@ public class DataRepositoryTest {
         reservation.put("endTime", "11:30");
         reservations.add(reservation);
 
-        boolean result = dataRepository.isSpotAvailable(reservations, "2025-05-24", "10:00", "12:00");
+        boolean result = dataRepository.isSpotAvailable(reservations, "2025-05-24", "10:00", "12:00", null);
         assertFalse(result); // Overlap
     }
 
@@ -85,7 +85,7 @@ public class DataRepositoryTest {
         reservation.put("endTime", "12:00");
         reservations.add(reservation);
 
-        boolean result = dataRepository.isSpotAvailable(reservations, "2025-05-24", "10:00", "12:00");
+        boolean result = dataRepository.isSpotAvailable(reservations, "2025-05-24", "10:00", "12:00", null);
         assertTrue(result); // Different day
     }
 

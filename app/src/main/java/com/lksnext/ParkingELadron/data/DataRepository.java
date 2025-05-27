@@ -1,5 +1,6 @@
 package com.lksnext.ParkingELadron.data;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -170,7 +171,7 @@ public class DataRepository {
                                             Map<String, Object> spot = spotDoc.getData();
                                             List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
 
-                                            if (isSpotAvailable(reservations, day, startTime, endTime)) {
+                                            if (isSpotAvailable(reservations, day, startTime, endTime, null)) {
                                                 reservationCreated.set(true);
                                                 createReservation(parkingId, spotDoc.getId(), day, startTime, endTime, userId, type, listener);
                                                 return; // No seguir buscando en este parking
@@ -244,12 +245,16 @@ public class DataRepository {
                 .addOnFailureListener(e -> listener.onReservationFailed("Error al actualizar la plaza: " + e.getMessage()));
     }
 
-    public boolean isSpotAvailable(List<Map<String, Object>> reservations, String day, String startTime, String endTime) {
+    public boolean isSpotAvailable(List<Map<String, Object>> reservations, String day, String startTime, String endTime, @Nullable String ignoreReservationId) {
         if (reservations == null || reservations.isEmpty()) {
             return true;
         }
 
         for (Map<String, Object> reservation : reservations) {
+            String reservationId = (String) reservation.get("reservationId");
+            if (ignoreReservationId != null && ignoreReservationId.equals(reservationId)) {
+                continue; // Ignora la reserva actual
+            }
             String reservedDay = (String) reservation.get("day");
             String reservedStartTime = (String) reservation.get("startTime");
             String reservedEndTime = (String) reservation.get("endTime");
@@ -258,7 +263,6 @@ public class DataRepository {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -334,18 +338,7 @@ public class DataRepository {
                         reservationEntry.put("day", new SimpleDateFormat("yyyy-MM-dd").format(reserva.getFecha()));
                         reservationEntry.put("startTime", reserva.getHoraInicio());
                         reservationEntry.put("endTime", reserva.getHoraFin());
-                        firestore.collection("parking")
-                                .document(reserva.getParkingId())
-                                .collection("parkingSpots")
-                                .document(reserva.getPlaza().getId())
-                                .update("reservations", FieldValue.arrayRemove(reservationEntry))
-                                .addOnSuccessListener(aVoid -> {
-                                    listener.onReservationRemoveSuccess();
-                                })
-                                .addOnFailureListener(aVoid -> {
-                                    listener.onReservationRemoveFailed("Error al eliminar reserva");
-                                });
-
+                        deleteSpotReservation(reserva.getParkingId(), reserva.getPlaza().getId(), reservationEntry, listener);
                     }
                 })
                 .addOnFailureListener(aVoid -> {
@@ -356,5 +349,76 @@ public class DataRepository {
     public interface OnReservationRemoveListener{
         void onReservationRemoveSuccess();
         void onReservationRemoveFailed(String msg);
+    }
+
+    public void editReservation(String oldId, String day, String endTime, String parkingId, TiposPlaza type, String startTime, String userId, OnReservationCompleteListener listener) {
+        AtomicBoolean reservationCreated = new AtomicBoolean(false);
+        firestore.collection("parking")
+                .document(parkingId)
+                .collection("parkingSpots")
+                .whereEqualTo("type", type)
+                .get()
+                .addOnSuccessListener(spotsQuerySnapshot -> {
+                    if (!spotsQuerySnapshot.isEmpty()) {
+                        for (QueryDocumentSnapshot spotDoc : spotsQuerySnapshot) {
+                            if (reservationCreated.get()) break;
+
+                            Map<String, Object> spot = spotDoc.getData();
+                            List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
+
+                            if (isSpotAvailable(reservations, day, startTime, endTime, null)) {
+                                reservationCreated.set(true);
+                                updateReservation(oldId, parkingId, spotDoc.getId(), day, startTime, endTime, type, listener);
+                                return; // No seguir buscando en este parking
+                            }
+                        }
+                    }
+                    // Si ya hemos terminado este parking, decrementamos el contador
+                    if (!reservationCreated.get()) {
+                        listener.onReservationFailed("No hay plazas disponibles.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // También decrementa y chequea el contador en caso de error
+                    listener.onReservationFailed("Error al buscar plazas: " + e.getMessage());
+                });
+    }
+
+    public void updateReservation(String oldId, String parkingId, String spotId, String day, String startTime, String endTime, TiposPlaza type, OnReservationCompleteListener listener) {
+        firestore.collection("reservations")
+                .document(oldId)
+                .update("day", day, "endTime", endTime, "spotId", spotId, "spotType", type.toString())
+                .addOnSuccessListener(a -> {
+                    Map<String, Object> reservationEntry = new HashMap<>();
+                    reservationEntry.put("reservationId", oldId);
+                    reservationEntry.put("day", new SimpleDateFormat("yyyy-MM-dd").format(day));
+                    reservationEntry.put("startTime", startTime);
+                    reservationEntry.put("endTime", endTime);
+                    deleteSpotReservation(parkingId, spotId, reservationEntry, new OnReservationRemoveListener() {
+                        @Override
+                        public void onReservationRemoveSuccess() {
+                            updateSpotWithReservation(parkingId, spotId, oldId, day, startTime, endTime, listener);
+                        }
+
+                        @Override
+                        public void onReservationRemoveFailed(String msg) {
+                            listener.onReservationFailed("Error al eliminar la reserva de la plaza.");
+                        }
+                    });
+                });
+    }
+
+    public void deleteSpotReservation(String parkingId, String spotId, Map<String, Object> reservationEntry, OnReservationRemoveListener listener) {
+        firestore.collection("parking")
+                .document(parkingId)
+                .collection("parkingSpots")
+                .document(spotId)
+                .update("reservations", FieldValue.arrayRemove(reservationEntry))
+                .addOnSuccessListener(aVoid -> {
+                    listener.onReservationRemoveSuccess();
+                })
+                .addOnFailureListener(aVoid -> {
+                    listener.onReservationRemoveFailed("Error al eliminar reserva");
+                });
     }
 }
