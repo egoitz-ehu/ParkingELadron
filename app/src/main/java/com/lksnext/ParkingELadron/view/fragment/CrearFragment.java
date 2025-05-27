@@ -184,10 +184,9 @@ public class CrearFragment extends Fragment {
         binding.btnCrear.setOnClickListener(v -> {
             if(reserva == null) {
                 viewModel.crearReserva(FirebaseAuth.getInstance().getUid()); // Pasa un userId ficticio
-
                 // Observa si la reserva fue creada con éxito
                 viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
-                    if(reserva == null && isCreated) {
+                    if(isCreated) {
                         Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
                         resetForm(); // Restablece los campos para permitir crear otra reserva
                     } else {
@@ -214,6 +213,12 @@ public class CrearFragment extends Fragment {
                         .setMessage(R.string.editar_preguntar)
                         .setPositiveButton(R.string.editar_si, (dialog, which) -> {
                             viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId());
+                            viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
+                                if(isCreated) {
+                                    Toast.makeText(getContext(), "Reserva editada con éxito", Toast.LENGTH_SHORT).show();
+                                    requireActivity().getSupportFragmentManager().popBackStack();
+                                }
+                            });
                         })
                         .setNegativeButton(R.string.editar_no, null)
                         .show();

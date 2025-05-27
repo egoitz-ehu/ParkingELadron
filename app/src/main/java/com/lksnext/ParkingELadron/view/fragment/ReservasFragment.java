@@ -85,7 +85,7 @@ public class ReservasFragment extends Fragment {
             public void onEditReservation() {
                 CrearFragment crearFragment = new CrearFragment();
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("reserva", reserva); // O putParcelable
+                bundle.putSerializable("reserva", reserva);
 
                 crearFragment.setArguments(bundle);
 
