@@ -123,4 +123,91 @@ public class CrearViewModelTest {
                 any(DataRepository.OnReservationCompleteListener.class)
         );
     }
+
+    @Test
+    public void testEditarReserva_datosNoValidos() throws InterruptedException {
+        viewModel.setDate(null);
+        viewModel.setType(null);
+        viewModel.setHoraFin(null);
+        viewModel.setHoraInicio(null);
+        viewModel.editarReserva("prueba", "prueba");
+        assertEquals("Por favor, completa todos los campos antes de crear la reserva.", LiveDataTestUtil.getValue(viewModel.getErrorMessage()));
+        assertFalse(LiveDataTestUtil.getValue(viewModel.getReservaCreada()));
+        verifyNoInteractions(mockRepository);
+    }
+
+    @Test
+    public void testEditarReserva_exito() throws InterruptedException {
+        viewModel.setDate(new Date());
+        viewModel.setHoraInicio("10:00");
+        viewModel.setHoraFin("12:00");
+        viewModel.setType(TiposPlaza.NORMAL);
+
+        doAnswer(invocation -> {
+            DataRepository.OnReservationCompleteListener listener = invocation.getArgument(7);
+            listener.onReservationSuccess("parking123", "spot123", "reservation123");
+            return null;
+        }).when(mockRepository).editReservation(
+                anyString(),
+                anyString(),
+                anyString(),
+                anyString(),
+                any(TiposPlaza.class),
+                anyString(),
+                anyString(),
+                any(DataRepository.OnReservationCompleteListener.class)
+        );
+
+        viewModel.editarReserva("1234", "2");
+
+        assertTrue(LiveDataTestUtil.getValue(viewModel.getReservaCreada()));
+        assertNull(LiveDataTestUtil.getValue(viewModel.getErrorMessage()));
+
+        verify(mockRepository, times(1)).editReservation(
+                Mockito.eq("1234"),
+                anyString(),
+                Mockito.eq("12:00"),
+                Mockito.eq("defaultParking"),
+                Mockito.eq(TiposPlaza.NORMAL),
+                Mockito.eq("10:00"),
+                Mockito.eq("2"),
+                any(DataRepository.OnReservationCompleteListener.class)
+        );
+    }
+
+    @Test
+    public void testEditarReserva_error() {
+        viewModel.setDate(new Date());
+        viewModel.setHoraInicio("10:00");
+        viewModel.setHoraFin("12:00");
+        viewModel.setType(TiposPlaza.NORMAL);
+
+        doAnswer(invocation -> {
+            DataRepository.OnReservationCompleteListener listener = invocation.getArgument(7);
+            listener.onReservationFailed("No hay plazas disponibles para hacer el cambio.");
+            return null;
+        }).when(mockRepository).editReservation(
+                anyString(),
+                anyString(),
+                anyString(),
+                anyString(),
+                any(TiposPlaza.class),
+                anyString(),
+                anyString(),
+                any(DataRepository.OnReservationCompleteListener.class)
+        );
+
+        viewModel.editarReserva("1234", "2");
+
+        verify(mockRepository, times(1)).editReservation(
+                Mockito.eq("1234"),
+                anyString(),
+                Mockito.eq("12:00"),
+                Mockito.eq("defaultParking"),
+                Mockito.eq(TiposPlaza.NORMAL),
+                Mockito.eq("10:00"),
+                Mockito.eq("2"),
+                any(DataRepository.OnReservationCompleteListener.class)
+        );
+    }
 }

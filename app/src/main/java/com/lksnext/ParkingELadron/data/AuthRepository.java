@@ -10,14 +10,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class AuthRepository {
     private FirebaseAuth firebaseAuth;
-    private FirebaseFirestore firestore;
 
-    public AuthRepository(FirebaseAuth auth, FirebaseFirestore firestore) {
+    public AuthRepository(FirebaseAuth auth) {
         this.firebaseAuth = auth;
-        this.firestore = firestore;
     }
     public AuthRepository() {
-        this(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance());
+        this(FirebaseAuth.getInstance());
     }
 
     private MutableLiveData<FirebaseUser> userLiveData = new MutableLiveData<>();

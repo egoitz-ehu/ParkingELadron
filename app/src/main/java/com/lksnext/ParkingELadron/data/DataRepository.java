@@ -376,7 +376,7 @@ public class DataRepository {
                     }
                     // Si ya hemos terminado este parking, decrementamos el contador
                     if (!reservationCreated.get()) {
-                        listener.onReservationFailed("No hay plazas disponibles.");
+                        listener.onReservationFailed("No hay plazas disponibles para hacer el cambio.");
                     }
                 })
                 .addOnFailureListener(e -> {
