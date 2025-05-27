@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.lksnext.ParkingELadron.data.DataRepository;
+import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 
 import java.text.SimpleDateFormat;
@@ -103,5 +104,30 @@ public class CrearViewModel extends ViewModel {
                         System.err.println("Error al crear la reserva: " + errorMessage);
                     }
                 });
+    }
+
+    public void editarReserva(String id) {
+        if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
+            errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
+            reservaCreada.setValue(false);
+            return;
+        }
+
+        // Formatea la fecha a un string
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = dateFormat.format(date.getValue());
+        dataRepository.editReservation(id, formattedDate, horaFin.getValue(), "defaultParking", type.getValue(), horaInicio.getValue(), new DataRepository.OnReservationCompleteListener() {
+            @Override
+            public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
+                reservaCreada.setValue(true);
+                errorMessage.setValue(null); // Sin error
+                System.out.println("Reserva editada con éxito: " + reservationId);
+            }
+
+            @Override
+            public void onReservationFailed(String err) {
+                errorMessage.setValue(err);
+            }
+        });
     }
 }

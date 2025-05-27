@@ -1,6 +1,8 @@
 package com.lksnext.ParkingELadron.domain;
 
-public class Plaza {
+import java.io.Serializable;
+
+public class Plaza implements Serializable {
     private String id;
     private TiposPlaza type;
 

@@ -1,8 +1,9 @@
 package com.lksnext.ParkingELadron.domain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Reserva {
+public class Reserva implements Serializable {
     private Date fecha;
     private String horaInicio;
     private String horaFin;

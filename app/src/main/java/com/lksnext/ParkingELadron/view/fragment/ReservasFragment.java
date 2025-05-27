@@ -1,5 +1,6 @@
 package com.lksnext.ParkingELadron.view.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -82,7 +83,17 @@ public class ReservasFragment extends Fragment {
 
             @Override
             public void onEditReservation() {
+                CrearFragment crearFragment = new CrearFragment();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("reserva", reserva); // O putParcelable
 
+                crearFragment.setArguments(bundle);
+
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.flFragment, crearFragment)
+                        .addToBackStack(null)
+                        .commit();
             }
 
             @Override

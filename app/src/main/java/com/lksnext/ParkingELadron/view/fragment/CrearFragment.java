@@ -1,5 +1,6 @@
 package com.lksnext.ParkingELadron.view.fragment;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentCrearBinding;
+import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
 
@@ -42,6 +44,18 @@ public class CrearFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Reserva reserva;
+        if(getArguments() != null && getArguments().containsKey("reserva")) {
+            reserva = (Reserva) getArguments().getSerializable("reserva");
+            viewModel.setDate(reserva.getFecha());
+            viewModel.setHoraInicio(reserva.getHoraInicio());
+            viewModel.setHoraFin(reserva.getHoraFin());
+            viewModel.setType(reserva.getPlaza().getType());
+            binding.btnCrear.setText(R.string.editart_btn);
+        } else {
+            reserva = null;
+        }
 
         // Configura el DatePicker para seleccionar la fecha
         binding.cvDia.setOnClickListener(v -> {
@@ -168,20 +182,42 @@ public class CrearFragment extends Fragment {
 
         // Configura el botón para crear la reserva
         binding.btnCrear.setOnClickListener(v -> {
-            viewModel.crearReserva(FirebaseAuth.getInstance().getUid()); // Pasa un userId ficticio
+            if(reserva == null) {
+                viewModel.crearReserva(FirebaseAuth.getInstance().getUid()); // Pasa un userId ficticio
 
-            // Observa si la reserva fue creada con éxito
-            viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
-                if (isCreated) {
-                    Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
-                    resetForm(); // Restablece los campos para permitir crear otra reserva
-                }
+                // Observa si la reserva fue creada con éxito
+                viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
+                    if(reserva == null && isCreated) {
+                        Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
+                        resetForm(); // Restablece los campos para permitir crear otra reserva
+                    } else {
+                        if(isCreated) {
+                            new AlertDialog
+                                    .Builder(requireContext())
+                                    .setTitle(R.string.title_editado)
+                                    .setMessage(R.string.reserva_editado)
+                                    .setPositiveButton(R.string.editar_si, (dialog, which)-> {
+                                        requireActivity().getSupportFragmentManager().popBackStack();
+                                    })
+                                    .show();
+                        }
+                    }
+                });
 
-            });
-
-            viewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
-                if(msg != null)  Toast.makeText(getContext(), "Error: " + msg, Toast.LENGTH_SHORT).show();
-            });
+                viewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
+                    if(msg != null)  Toast.makeText(getContext(), "Error: " + msg, Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                new AlertDialog
+                        .Builder(requireContext())
+                        .setTitle(R.string.editart_btn)
+                        .setMessage(R.string.editar_preguntar)
+                        .setPositiveButton(R.string.editar_si, (dialog, which) -> {
+                            viewModel.editarReserva(reserva.getId());
+                        })
+                        .setNegativeButton(R.string.editar_no, null)
+                        .show();
+            }
         });
     }
 

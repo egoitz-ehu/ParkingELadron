@@ -351,12 +351,12 @@ public class DataRepository {
         void onReservationRemoveFailed(String msg);
     }
 
-    public void editReservation(String oldId, String day, String endTime, String parkingId, TiposPlaza type, String startTime, String userId, OnReservationCompleteListener listener) {
+    public void editReservation(String oldId, String day, String endTime, String parkingId, TiposPlaza type, String startTime, OnReservationCompleteListener listener) {
         AtomicBoolean reservationCreated = new AtomicBoolean(false);
         firestore.collection("parking")
                 .document(parkingId)
                 .collection("parkingSpots")
-                .whereEqualTo("type", type)
+                .whereEqualTo("type", type.toString())
                 .get()
                 .addOnSuccessListener(spotsQuerySnapshot -> {
                     if (!spotsQuerySnapshot.isEmpty()) {
@@ -391,7 +391,7 @@ public class DataRepository {
                 .addOnSuccessListener(a -> {
                     Map<String, Object> reservationEntry = new HashMap<>();
                     reservationEntry.put("reservationId", oldId);
-                    reservationEntry.put("day", new SimpleDateFormat("yyyy-MM-dd").format(day));
+                    reservationEntry.put("day", day);
                     reservationEntry.put("startTime", startTime);
                     reservationEntry.put("endTime", endTime);
                     deleteSpotReservation(parkingId, spotId, reservationEntry, new OnReservationRemoveListener() {

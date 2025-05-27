@@ -54,4 +54,14 @@
     <string name="change_title">Cambiar contraseña</string>
 
     <string name="reserva_empty">No tienes reservas. Crea una para empezar.</string>
+
+    <string name="editart_btn">Guardar cambios</string>
+    <string name="editar_preguntar">¿Quieres editar la reserva?</string>
+    <string name="editar_si">Sí</string>
+    <string name="editar_no">No</string>
+    <string name="title_editado">Reserva editada</string>
+    <string name="reserva_editado">La reserva ha sido editada con exito</string>
+
+    <string name="dialog_reserva">Editar</string>
+    <string name="dialog_eliminar">Eliminar</string>
 </resources>
