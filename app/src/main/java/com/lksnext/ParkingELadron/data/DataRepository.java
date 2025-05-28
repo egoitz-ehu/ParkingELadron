@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -297,18 +298,58 @@ public class DataRepository {
                         List<DocumentSnapshot> documents = querySnapshot.getDocuments();
                         List<Reserva> reservations = new ArrayList<>();
                         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                        for(DocumentSnapshot doc:documents) {
+                        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                        Date now = new Date();
+
+                        for (DocumentSnapshot doc : documents) {
                             try {
-                                reservations.add(new Reserva(
-                                        format.parse(doc.getString("day")),
-                                        doc.getString("startTime"),
-                                        doc.getString("endTime"),
-                                        new Plaza(doc.getString("spotId"), TiposPlaza.valueOf(doc.getString("spotType"))),
+                                // Parse datos
+                                Date day = format.parse(doc.getString("day"));
+                                String startTime = doc.getString("startTime");
+                                String endTime = doc.getString("endTime");
+                                String spotTypeStr = doc.getString("spotType");
+                                EstadoReserva estado = EstadoReserva.valueOf(doc.getString("state"));
+
+                                // Construir fechas completas
+                                String dayStr = doc.getString("day");
+                                Date startDateTime = dateTimeFormat.parse(dayStr + " " + startTime);
+                                Date endDateTime = dateTimeFormat.parse(dayStr + " " + endTime);
+
+                                // Lógica de actualización de estado
+                                EstadoReserva nuevoEstado = estado;
+                                if (now.after(startDateTime) && now.before(endDateTime)) {
+                                    // Activa
+                                    if (estado != EstadoReserva.EN_MARCHA) {
+                                        nuevoEstado = EstadoReserva.EN_MARCHA;
+                                        // Actualizar en Firestore si quieres persistir el cambio
+                                        doc.getReference().update("state", EstadoReserva.EN_MARCHA.toString());
+                                    }
+                                } else if (now.after(endDateTime)) {
+                                    // Finalizada
+                                    if (estado != EstadoReserva.Finalizado) {
+                                        nuevoEstado = EstadoReserva.Finalizado;
+                                        // Actualizar en Firestore si quieres persistir el cambio
+                                        doc.getReference().update("state", EstadoReserva.Finalizado.toString());
+                                    }
+                                } else {
+                                    // Pendiente o Reservada
+                                    if (estado != EstadoReserva.Reservado) {
+                                        nuevoEstado = EstadoReserva.Reservado;
+                                        doc.getReference().update("state", EstadoReserva.Reservado.toString());
+                                    }
+                                }
+
+                                Reserva r = new Reserva(
+                                        day,
+                                        startTime,
+                                        endTime,
+                                        new Plaza(doc.getString("spotId"), TiposPlaza.valueOf(spotTypeStr)),
                                         doc.getString("userId"),
-                                        EstadoReserva.valueOf(doc.getString("state")),
+                                        nuevoEstado,
                                         doc.getId(),
                                         doc.getString("parkingId")
-                                ));
+                                );
+                                reservations.add(r);
                             } catch (ParseException e) {
                                 System.out.println("Problema al parsear date");
                             }
