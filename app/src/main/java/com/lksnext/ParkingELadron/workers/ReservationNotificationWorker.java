@@ -47,13 +47,12 @@ public class ReservationNotificationWorker extends Worker {
 
         // smallIcon: blanco con P negra (vector XML en res/drawable/ic_parking_notification.xml)
         // largeIcon: icono a color, PNG recomendado en res/drawable/ic_parking_colored.png
-        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_parking_colored);
+       // Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_parking_colored);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_parking_notification)
-                .setLargeIcon(largeIcon)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 // Opcional: color de acento para la barra/círculo

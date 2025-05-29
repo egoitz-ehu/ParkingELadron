@@ -172,7 +172,8 @@ public class CrearViewModel extends ViewModel {
                         "¡Tu reserva está cerca!",
                         "Quedan 30 minutos para que comience tu reserva.",
                         triggerAt30 - now,
-                        context
+                        context,
+                        reserva.getId()
                 );
             }
 
@@ -183,7 +184,8 @@ public class CrearViewModel extends ViewModel {
                         "¡Tu reserva está por terminar!",
                         "Quedan 15 minutos para que finalice tu reserva.",
                         triggerAt15 - now,
-                        context
+                        context,
+                        reserva.getId()
                 );
             }
 
@@ -192,7 +194,7 @@ public class CrearViewModel extends ViewModel {
         }
     }
 
-    private void scheduleNotification(String title, String message, long delayMillis, Context context) {
+    private void scheduleNotification(String title, String message, long delayMillis, Context context, String reservationId) {
         Data data = new Data.Builder()
                 .putString(ReservationNotificationWorker.KEY_TITLE, title)
                 .putString(ReservationNotificationWorker.KEY_MESSAGE, message)
@@ -203,6 +205,10 @@ public class CrearViewModel extends ViewModel {
                 .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
                 .build();
 
+        String workIdString = workRequest.getId().toString();
+
         WorkManager.getInstance(context).enqueue(workRequest);
+
+        dataRepository.storeWorkerId(workIdString, reservationId);
     }
 }

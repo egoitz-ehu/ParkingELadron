@@ -473,4 +473,10 @@ public class DataRepository {
                     listener.onReservationRemoveFailed("Error al eliminar reserva");
                 });
     }
+
+    public void storeWorkerId(String workerId, String reservationId) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("notificationWorkerId1", workerId);
+        firestore.collection("reservations").document(reservationId).update(data);
+    }
 }
