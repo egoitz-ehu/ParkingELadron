@@ -5,6 +5,15 @@ import java.io.Serializable;
 public class Plaza implements Serializable {
     private String id;
     private TiposPlaza type;
+    private boolean available;
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 
     // Constructor vacío requerido por Firebase
     public Plaza() {}
@@ -12,6 +21,12 @@ public class Plaza implements Serializable {
     public Plaza(String id, TiposPlaza type) {
         this.id = id;
         this.type = type;
+    }
+
+    public Plaza(String id, TiposPlaza type, boolean available) {
+        this.id = id;
+        this.type = type;
+        this.available = available;
     }
 
     // Getters y Setters

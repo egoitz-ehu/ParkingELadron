@@ -252,9 +252,17 @@ public class CrearFragment extends Fragment {
         });
 
         binding.btnSeleccionar.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), SelectParkingActivity.class);
-            intent.putExtra(SelectParkingActivity.EXTRA_PARKING_ID, "defaultParking");
-            startActivity(intent);
+            if(!(viewModel.getHoraInicio().getValue() == null || viewModel.getHoraFin().getValue() == null || viewModel.getDate().getValue() == null)){
+                Intent intent = new Intent(getContext(), SelectParkingActivity.class);
+                intent.putExtra(SelectParkingActivity.EXTRA_PARKING_ID, "defaultParking");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String formattedDate = dateFormat.format(viewModel.getDate().getValue());
+                intent.putExtra(SelectParkingActivity.EXTRA_SELECTED_DATE, formattedDate);
+
+                intent.putExtra(SelectParkingActivity.EXTRA_START_TIME, viewModel.getHoraInicio().getValue());
+                intent.putExtra(SelectParkingActivity.EXTRA_END_TIME, viewModel.getHoraFin().getValue());
+                startActivity(intent);
+            }
         });
     }
 

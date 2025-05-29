@@ -26,6 +26,9 @@ public class SelectParkingActivity extends AppCompatActivity implements ParkingS
     private ProgressBar progressBar;
 
     public static final String EXTRA_PARKING_ID = "extra_parking_id";
+    public static final String EXTRA_SELECTED_DATE = "extra_selected_date";
+    public static final String EXTRA_START_TIME = "extra_start_time";
+    public static final String EXTRA_END_TIME = "extra_end_time";
     public static final String EXTRA_SELECTED_SPOT = "extra_selected_spot";
 
     @Override
@@ -46,12 +49,17 @@ public class SelectParkingActivity extends AppCompatActivity implements ParkingS
         // Observar cambios en el ViewModel
         observeViewModel();
 
-        // Cargar plazas de estacionamiento
-        String parkingId = getIntent().getStringExtra(EXTRA_PARKING_ID);
-        if (parkingId != null) {
-            viewModel.loadParkingSpotsForParking(parkingId);
+        // Obtener datos de la intención
+        Intent intent = getIntent();
+        String parkingId = intent.getStringExtra(EXTRA_PARKING_ID);
+        String selectedDate = intent.getStringExtra(EXTRA_SELECTED_DATE);
+        String startTime = intent.getStringExtra(EXTRA_START_TIME);
+        String endTime = intent.getStringExtra(EXTRA_END_TIME);
+
+        if (parkingId != null && selectedDate != null && startTime != null && endTime != null) {
+            viewModel.loadParkingSpotsForParking(parkingId, selectedDate, startTime, endTime);
         } else {
-            Toast.makeText(this, "Error: ID de parking no proporcionado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error: Faltan datos necesarios", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -90,6 +98,10 @@ public class SelectParkingActivity extends AppCompatActivity implements ParkingS
 
     @Override
     public void onParkingSpotClick(Plaza plaza) {
-        viewModel.selectParkingSpot(plaza);
+        if (plaza.isAvailable()) {
+            viewModel.selectParkingSpot(plaza);
+        } else {
+            Toast.makeText(this, "Esta plaza no está disponible en el horario seleccionado", Toast.LENGTH_SHORT).show();
+        }
     }
 }
