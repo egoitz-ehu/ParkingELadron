@@ -1,16 +1,28 @@
 package com.lksnext.ParkingELadron.viewmodel;
 
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.lksnext.ParkingELadron.data.DataRepository;
+import com.lksnext.ParkingELadron.domain.EstadoReserva;
+import com.lksnext.ParkingELadron.domain.Plaza;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
+import com.lksnext.ParkingELadron.workers.ReservationNotificationWorker;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class CrearViewModel extends ViewModel {
     private final MutableLiveData<Date> date = new MutableLiveData<>();
@@ -70,7 +82,7 @@ public class CrearViewModel extends ViewModel {
         return errorMessage;
     }
 
-    public void crearReserva(String userId) {
+    public void crearReserva(String userId, Context context) {
         // Verifica que todos los datos necesarios están presentes
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
@@ -92,6 +104,17 @@ public class CrearViewModel extends ViewModel {
                 new DataRepository.OnReservationCompleteListener() {
                     @Override
                     public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
+                        Reserva reserva = new Reserva(
+                                date.getValue(),
+                                horaInicio.getValue(),
+                                horaFin.getValue(),
+                                new Plaza(spotId,type.getValue()),
+                                FirebaseAuth.getInstance().getUid(),
+                                EstadoReserva.Reservado,
+                                reservationId,
+                                parkingId
+                        );
+                        scheduleNotificationForReserva(reserva, context);
                         reservaCreada.setValue(true);
                         errorMessage.setValue(null); // Sin error
                         System.out.println("Reserva creada con éxito: " + reservationId);
@@ -106,7 +129,7 @@ public class CrearViewModel extends ViewModel {
                 });
     }
 
-    public void editarReserva(String id, String oldSpot) {
+    public void editarReserva(String id, String oldSpot, Context context) {
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
             reservaCreada.setValue(false);
@@ -122,6 +145,13 @@ public class CrearViewModel extends ViewModel {
                 reservaCreada.setValue(true);
                 errorMessage.setValue(null); // Sin error
                 System.out.println("Reserva editada con éxito: " + reservationId);
+                Reserva reserva = dataRepository.getReservationsLiveData().getValue().stream().filter(r -> r.getId().equals(id)).findFirst().orElse(null);
+                UUID oldWorkId1 = UUID.fromString(reserva.getNotificationWorkerId1());
+                UUID oldWorkId2 = UUID.fromString(reserva.getNotificationWorkerId2());
+                WorkManager.getInstance(context).cancelWorkById(oldWorkId1);
+                WorkManager.getInstance(context).cancelWorkById(oldWorkId2);
+                System.out.println("Worker cancelado por edicion");
+                scheduleNotificationForReserva(reserva, context);
             }
 
             @Override
@@ -129,5 +159,68 @@ public class CrearViewModel extends ViewModel {
                 errorMessage.setValue(err);
             }
         });
+    }
+
+    public void scheduleNotificationForReserva(Reserva reserva, Context context) {
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String dayStr = dateFormat.format(reserva.getFecha());
+        String startTime = reserva.getHoraInicio();
+        String endTime = reserva.getHoraFin();
+
+        try {
+            Date startDateTime = dateTimeFormat.parse(dayStr + " " + startTime);
+            Date endDateTime = dateTimeFormat.parse(dayStr + " " + endTime);
+            long now = System.currentTimeMillis();
+
+            // Notificación 30 minutos antes del inicio
+            long triggerAt30 = startDateTime.getTime() - (30 * 60 * 1000);
+            if (triggerAt30 > now) {
+                scheduleNotification(
+                        "¡Tu reserva está cerca!",
+                        "Quedan 30 minutos para que comience tu reserva.",
+                        triggerAt30 - now,
+                        context,
+                        reserva.getId(),
+                        "notificationWorkerId1"
+                );
+            }
+
+            // Notificación 15 minutos antes del final
+            long triggerAt15 = endDateTime.getTime() - (15 * 60 * 1000);
+            if (triggerAt15 > now) {
+                scheduleNotification(
+                        "¡Tu reserva está por terminar!",
+                        "Quedan 15 minutos para que finalice tu reserva.",
+                        triggerAt15 - now,
+                        context,
+                        reserva.getId(),
+                        "notificationWorkerId2"
+                );
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void scheduleNotification(String title, String message, long delayMillis, Context context, String reservationId, String t) {
+        Data data = new Data.Builder()
+                .putString(ReservationNotificationWorker.KEY_TITLE, title)
+                .putString(ReservationNotificationWorker.KEY_MESSAGE, message)
+                .build();
+
+        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ReservationNotificationWorker.class)
+                .setInputData(data)
+                .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+                .build();
+
+        String workIdString = workRequest.getId().toString();
+
+        WorkManager.getInstance(context).enqueue(workRequest);
+
+        dataRepository.storeWorkerId(workIdString, reservationId, t);
+
+        System.out.println("Worker creado para noti");
     }
 }

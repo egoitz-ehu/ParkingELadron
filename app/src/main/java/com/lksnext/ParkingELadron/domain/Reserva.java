@@ -15,6 +15,25 @@ public class Reserva implements Serializable {
 
     private String parkingId;
 
+    private String notificationWorkerId1;
+    private String notificationWorkerId2;
+
+    public String getNotificationWorkerId2() {
+        return notificationWorkerId2;
+    }
+
+    public void setNotificationWorkerId2(String notificationWorkerId2) {
+        this.notificationWorkerId2 = notificationWorkerId2;
+    }
+
+    public String getNotificationWorkerId1() {
+        return notificationWorkerId1;
+    }
+
+    public void setNotificationWorkerId1(String notificationWorkerId1) {
+        this.notificationWorkerId1 = notificationWorkerId1;
+    }
+
     public Date getFecha() {
         return fecha;
     }

@@ -64,4 +64,8 @@
 
     <string name="dialog_reserva">Editar</string>
     <string name="dialog_eliminar">Eliminar</string>
+
+    <string name="reserva_reservado">Reservado</string>
+    <string name="reserva_enMarcha">En marcha</string>
+    <string name="reserva_finalizado">Finalizado</string>
 </resources>

@@ -23,16 +23,19 @@ public class ReservaViewHolder extends RecyclerView.ViewHolder {
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
         binding.tvDate.setText(format.format(reserva.getFecha()));
         binding.tvHour.setText(reserva.getHoraInicio() + "-" + reserva.getHoraFin());
-        binding.tvStatus.setText(reserva.getEstado().toString());
         switch (reserva.getEstado()) {
             case Reservado:
                 binding.tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.reservaReservado));
+                binding.tvStatus.setText(R.string.reserva_reservado);
                 break;
-            case Cancelado:
-                binding.tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.reservaCancelado));
+            case EN_MARCHA:
+                binding.tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.reservaEnMarcha));
+                binding.tvStatus.setText(R.string.reserva_enMarcha);
                 break;
             case Finalizado:
                 binding.tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.reservaFinalizado));
+                binding.tvStatus.setText(R.string.reserva_finalizado);
+                break;
         }
         binding.getRoot().setOnClickListener(v->{
             listener.onItemClick(reserva);

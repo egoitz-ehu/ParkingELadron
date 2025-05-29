@@ -7,8 +7,8 @@
     <color name="secondaryWhite">#AEAEB3</color>
 
     <color name="reservaReservado">#4EF462</color>
-    <color name="reservaCancelado">#F13C36</color>
-    <color name="reservaFinalizado">#F4B224</color>
+    <color name="reservaEnMarcha">#1D5DF8</color>
+    <color name="reservaFinalizado">#E22232</color>
 
     <color name="eliminarReserva">#F12222</color>
 
