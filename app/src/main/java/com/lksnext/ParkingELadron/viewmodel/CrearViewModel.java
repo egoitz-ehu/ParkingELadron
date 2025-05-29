@@ -1,13 +1,8 @@
 package com.lksnext.ParkingELadron.viewmodel;
 
-import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.lksnext.ParkingELadron.data.DataRepository;
@@ -15,14 +10,11 @@ import com.lksnext.ParkingELadron.domain.EstadoReserva;
 import com.lksnext.ParkingELadron.domain.Plaza;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
-import com.lksnext.ParkingELadron.workers.ReservationNotificationWorker;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class CrearViewModel extends ViewModel {
     private final MutableLiveData<Date> date = new MutableLiveData<>();
@@ -31,6 +23,9 @@ public class CrearViewModel extends ViewModel {
     private final MutableLiveData<TiposPlaza> type = new MutableLiveData<>();
     private final MutableLiveData<Boolean> reservaCreada = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+
+    // Para comunicar los WorkerIDs a cancelar/crear
+    private final MutableLiveData<WorkerNotificationEvent> workerEvent = new MutableLiveData<>();
 
     private final DataRepository dataRepository;
 
@@ -42,65 +37,35 @@ public class CrearViewModel extends ViewModel {
         dataRepository = r;
     }
 
-    public LiveData<Date> getDate() {
-        return date;
-    }
+    public LiveData<Date> getDate() { return date; }
+    public void setDate(Date d) { this.date.setValue(d); }
+    public LiveData<String> getHoraInicio() { return horaInicio; }
+    public void setHoraInicio(String horaInicio) { this.horaInicio.setValue(horaInicio); }
+    public LiveData<String> getHoraFin() { return horaFin; }
+    public void setHoraFin(String horaFin) { this.horaFin.setValue(horaFin); }
+    public LiveData<TiposPlaza> getType() { return type; }
+    public void setType(TiposPlaza type) { this.type.setValue(type); }
+    public LiveData<Boolean> getReservaCreada() { return reservaCreada; }
+    public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<WorkerNotificationEvent> getWorkerEvent() { return workerEvent; }
 
-    public void setDate(Date d) {
-        this.date.setValue(d);
-    }
 
-    public LiveData<String> getHoraInicio() {
-        return horaInicio;
-    }
-
-    public void setHoraInicio(String horaInicio) {
-        this.horaInicio.setValue(horaInicio);
-    }
-
-    public LiveData<String> getHoraFin() {
-        return horaFin;
-    }
-
-    public void setHoraFin(String horaFin) {
-        this.horaFin.setValue(horaFin);
-    }
-
-    public LiveData<TiposPlaza> getType() {
-        return type;
-    }
-
-    public void setType(TiposPlaza type) {
-        this.type.setValue(type);
-    }
-
-    public LiveData<Boolean> getReservaCreada() {
-        return reservaCreada;
-    }
-
-    public LiveData<String> getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void crearReserva(String userId, Context context) {
-        // Verifica que todos los datos necesarios están presentes
+    public void crearReserva(String userId) {
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
             reservaCreada.setValue(false);
             return;
         }
 
-        // Formatea la fecha a un string
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String formattedDate = dateFormat.format(date.getValue());
 
-        // Llama al método del repositorio para crear la reserva
         dataRepository.findAndCreateReservation(
-                type.getValue().toString(), // Tipo de plaza
-                formattedDate,             // Día
-                horaInicio.getValue(),     // Hora de inicio
-                horaFin.getValue(),        // Hora de fin
-                userId,                    // ID del usuario
+                type.getValue().toString(),
+                formattedDate,
+                horaInicio.getValue(),
+                horaFin.getValue(),
+                userId,
                 new DataRepository.OnReservationCompleteListener() {
                     @Override
                     public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
@@ -108,50 +73,64 @@ public class CrearViewModel extends ViewModel {
                                 date.getValue(),
                                 horaInicio.getValue(),
                                 horaFin.getValue(),
-                                new Plaza(spotId,type.getValue()),
+                                new Plaza(spotId, type.getValue()),
                                 FirebaseAuth.getInstance().getUid(),
                                 EstadoReserva.Reservado,
                                 reservationId,
                                 parkingId
                         );
-                        scheduleNotificationForReserva(reserva, context);
+                        // Notifica al Fragment para programar workers
+                        workerEvent.postValue(new WorkerNotificationEvent(reserva, null, null));
                         reservaCreada.setValue(true);
-                        errorMessage.setValue(null); // Sin error
-                        System.out.println("Reserva creada con éxito: " + reservationId);
+                        errorMessage.setValue(null);
                     }
-
                     @Override
                     public void onReservationFailed(String ms) {
                         reservaCreada.postValue(false);
                         errorMessage.setValue(ms);
-                        System.err.println("Error al crear la reserva: " + errorMessage);
                     }
                 });
     }
 
-    public void editarReserva(String id, String oldSpot, Context context) {
+
+    public void editarReserva(String id, String oldSpot) {
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
             reservaCreada.setValue(false);
             return;
         }
-
-        // Formatea la fecha a un string
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String formattedDate = dateFormat.format(date.getValue());
         dataRepository.editReservation(id, formattedDate, horaFin.getValue(), "defaultParking", type.getValue(), horaInicio.getValue(), oldSpot, new DataRepository.OnReservationCompleteListener() {
             @Override
             public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
+                // Obtener la reserva original para los WorkerIds
+                Reserva reservaOriginal = dataRepository.getReservationsLiveData().getValue().stream()
+                        .filter(r -> r.getId().equals(id)).findFirst().orElseThrow();
+
+                String oldWorkId1 = reservaOriginal.getNotificationWorkerId1();
+                String oldWorkId2 = reservaOriginal.getNotificationWorkerId2();
+
+                // CREAR RESERVA NUEVA CON LOS VALORES ACTUALIZADOS
+                Reserva reservaActualizada = new Reserva(
+                        date.getValue(),  // Los valores del ViewModel (actualizados)
+                        horaInicio.getValue(),
+                        horaFin.getValue(),
+                        new Plaza(spotId, type.getValue()),
+                        FirebaseAuth.getInstance().getUid(),
+                        EstadoReserva.Reservado,
+                        id,  // Mantiene el mismo ID
+                        parkingId
+                );
+
+                // Pasamos los worker IDs antiguos a la reserva actualizada
+                reservaActualizada.setNotificationWorkerId1(oldWorkId1);
+                reservaActualizada.setNotificationWorkerId2(oldWorkId2);
+
+                // Notifica al Fragment con la RESERVA ACTUALIZADA
+                workerEvent.postValue(new WorkerNotificationEvent(reservaActualizada, oldWorkId1, oldWorkId2));
                 reservaCreada.setValue(true);
-                errorMessage.setValue(null); // Sin error
-                System.out.println("Reserva editada con éxito: " + reservationId);
-                Reserva reserva = dataRepository.getReservationsLiveData().getValue().stream().filter(r -> r.getId().equals(id)).findFirst().orElse(null);
-                UUID oldWorkId1 = UUID.fromString(reserva.getNotificationWorkerId1());
-                UUID oldWorkId2 = UUID.fromString(reserva.getNotificationWorkerId2());
-                WorkManager.getInstance(context).cancelWorkById(oldWorkId1);
-                WorkManager.getInstance(context).cancelWorkById(oldWorkId2);
-                System.out.println("Worker cancelado por edicion");
-                scheduleNotificationForReserva(reserva, context);
+                errorMessage.setValue(null);
             }
 
             @Override
@@ -161,66 +140,18 @@ public class CrearViewModel extends ViewModel {
         });
     }
 
-    public void scheduleNotificationForReserva(Reserva reserva, Context context) {
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String dayStr = dateFormat.format(reserva.getFecha());
-        String startTime = reserva.getHoraInicio();
-        String endTime = reserva.getHoraFin();
-
-        try {
-            Date startDateTime = dateTimeFormat.parse(dayStr + " " + startTime);
-            Date endDateTime = dateTimeFormat.parse(dayStr + " " + endTime);
-            long now = System.currentTimeMillis();
-
-            // Notificación 30 minutos antes del inicio
-            long triggerAt30 = startDateTime.getTime() - (30 * 60 * 1000);
-            if (triggerAt30 > now) {
-                scheduleNotification(
-                        "¡Tu reserva está cerca!",
-                        "Quedan 30 minutos para que comience tu reserva.",
-                        triggerAt30 - now,
-                        context,
-                        reserva.getId(),
-                        "notificationWorkerId1"
-                );
-            }
-
-            // Notificación 15 minutos antes del final
-            long triggerAt15 = endDateTime.getTime() - (15 * 60 * 1000);
-            if (triggerAt15 > now) {
-                scheduleNotification(
-                        "¡Tu reserva está por terminar!",
-                        "Quedan 15 minutos para que finalice tu reserva.",
-                        triggerAt15 - now,
-                        context,
-                        reserva.getId(),
-                        "notificationWorkerId2"
-                );
-            }
-
-        } catch (ParseException e) {
-            e.printStackTrace();
+    public static class WorkerNotificationEvent {
+        public final Reserva reserva;
+        public final String cancelWorkId1;
+        public final String cancelWorkId2;
+        public WorkerNotificationEvent(Reserva reserva, String cancelWorkId1, String cancelWorkId2) {
+            this.reserva = reserva;
+            this.cancelWorkId1 = cancelWorkId1;
+            this.cancelWorkId2 = cancelWorkId2;
         }
     }
 
-    private void scheduleNotification(String title, String message, long delayMillis, Context context, String reservationId, String t) {
-        Data data = new Data.Builder()
-                .putString(ReservationNotificationWorker.KEY_TITLE, title)
-                .putString(ReservationNotificationWorker.KEY_MESSAGE, message)
-                .build();
-
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ReservationNotificationWorker.class)
-                .setInputData(data)
-                .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
-                .build();
-
-        String workIdString = workRequest.getId().toString();
-
-        WorkManager.getInstance(context).enqueue(workRequest);
-
-        dataRepository.storeWorkerId(workIdString, reservationId, t);
-
-        System.out.println("Worker creado para noti");
+    public void storeWorkerInRepository(String workerId, String reservaId, String type) {
+        dataRepository.storeWorkerId(workerId, reservaId, type);
     }
 }

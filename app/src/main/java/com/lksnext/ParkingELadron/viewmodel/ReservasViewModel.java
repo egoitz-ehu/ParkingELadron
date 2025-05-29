@@ -18,7 +18,9 @@ import java.util.UUID;
 public class ReservasViewModel extends ViewModel {
     private final DataRepository dataRepository;
 
-    private MutableLiveData<String> errorMessageLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> errorMessageLiveData = new MutableLiveData<>();
+
+    private MutableLiveData<Reserva> reservaEliminadaLiveData = new MutableLiveData<>();
 
     public ReservasViewModel() {
         this(DataRepository.getInstance());
@@ -40,14 +42,15 @@ public class ReservasViewModel extends ViewModel {
         return errorMessageLiveData;
     }
 
-    public void removeReservation(Reserva reserva, Context context) {
+    public LiveData<Reserva> getReservaEliminadaLiveData() {
+        return reservaEliminadaLiveData;
+    }
+
+    public void removeReservation(Reserva reserva) {
         dataRepository.deleteReservation(reserva, new DataRepository.OnReservationRemoveListener() {
             @Override
             public void onReservationRemoveSuccess() {
-                errorMessageLiveData.setValue(null);
-                WorkManager.getInstance(context).cancelWorkById(UUID.fromString(reserva.getNotificationWorkerId1()));
-                WorkManager.getInstance(context).cancelWorkById(UUID.fromString(reserva.getNotificationWorkerId2()));
-                System.out.println("Worker cancelado por eliminacion");
+                reservaEliminadaLiveData.setValue(reserva);
             }
 
             @Override

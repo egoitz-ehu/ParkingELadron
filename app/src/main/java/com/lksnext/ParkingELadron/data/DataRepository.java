@@ -429,7 +429,7 @@ public class DataRepository {
     public void updateReservation(String oldId, String parkingId, String spotId, String day, String startTime, String endTime, TiposPlaza type, String newSpot, OnReservationCompleteListener listener) {
         firestore.collection("reservations")
                 .document(oldId)
-                .update("day", day, "endTime", endTime, "spotId", spotId, "spotType", type.toString())
+                .update("day", day,"startTime", startTime, "endTime", endTime, "spotId", newSpot, "spotType", type.toString())
                 .addOnSuccessListener(a -> {
                     Map<String, Object> reservationEntry = new HashMap<>();
                     reservationEntry.put("reservationId", oldId);
@@ -444,7 +444,15 @@ public class DataRepository {
                             Plaza newSpotWithReservation = new Plaza(newSpot, type);
                             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                             try {
-                                reservationsLiveData.getValue().add(new Reserva(format.parse(day), startTime, endTime, newSpotWithReservation, FirebaseAuth.getInstance().getUid(), EstadoReserva.Reservado, oldId, parkingId));
+                                reservationsLiveData.getValue().add(new Reserva(
+                                        format.parse(day),
+                                        startTime,
+                                        endTime,
+                                        newSpotWithReservation,
+                                        FirebaseAuth.getInstance().getUid(),
+                                        EstadoReserva.Reservado,
+                                        oldId,
+                                        parkingId));
                             } catch (ParseException e) {
                                 System.out.println("Problema de parseo");
                             }

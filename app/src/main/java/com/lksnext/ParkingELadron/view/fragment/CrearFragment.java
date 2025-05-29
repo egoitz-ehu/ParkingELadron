@@ -7,6 +7,9 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,10 +26,15 @@ import com.lksnext.ParkingELadron.databinding.FragmentCrearBinding;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
+import com.lksnext.ParkingELadron.workers.ReservationNotificationWorker;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class CrearFragment extends Fragment {
 
@@ -183,7 +191,7 @@ public class CrearFragment extends Fragment {
         // Configura el botón para crear la reserva
         binding.btnCrear.setOnClickListener(v -> {
             if(reserva == null) {
-                viewModel.crearReserva(FirebaseAuth.getInstance().getUid(), requireContext());
+                viewModel.crearReserva(FirebaseAuth.getInstance().getUid());
                 // Observa si la reserva fue creada con éxito
                 viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
                     if(isCreated) {
@@ -212,7 +220,7 @@ public class CrearFragment extends Fragment {
                         .setTitle(R.string.editart_btn)
                         .setMessage(R.string.editar_preguntar)
                         .setPositiveButton(R.string.editar_si, (dialog, which) -> {
-                            viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId(), requireContext());
+                            viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId());
                             viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
                                 if(isCreated) {
                                     Toast.makeText(getContext(), "Reserva editada con éxito", Toast.LENGTH_SHORT).show();
@@ -224,6 +232,22 @@ public class CrearFragment extends Fragment {
                         .show();
             }
         });
+
+        viewModel.getWorkerEvent().observe(getViewLifecycleOwner(), event -> {
+            if (event == null) return;
+
+            if (event.cancelWorkId1 != null && !event.cancelWorkId1.isEmpty()) {
+                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(event.cancelWorkId1));
+            }
+            if (event.cancelWorkId2 != null && !event.cancelWorkId2.isEmpty()) {
+                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(event.cancelWorkId2));
+            }
+
+            // 2. Si hay reserva, programa nuevas notificaciones
+            if (event.reserva != null) {
+                scheduleNotificationForReserva(event.reserva);
+            }
+        });
     }
 
     // Restablece los campos del formulario y el ViewModel
@@ -232,5 +256,64 @@ public class CrearFragment extends Fragment {
         viewModel.setHoraInicio(null);
         viewModel.setHoraFin(null);
         binding.spinner.setSelection(0);
+    }
+
+    private void scheduleNotificationForReserva(Reserva reserva) {
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String dayStr = dateFormat.format(reserva.getFecha());
+        String startTime = reserva.getHoraInicio();
+        String endTime = reserva.getHoraFin();
+
+        try {
+            Date startDateTime = dateTimeFormat.parse(dayStr + " " + startTime);
+            Date endDateTime = dateTimeFormat.parse(dayStr + " " + endTime);
+            long now = System.currentTimeMillis();
+
+            // Notificación 30 minutos antes del inicio
+            long triggerAt30 = startDateTime.getTime() - (30 * 60 * 1000);
+            if (triggerAt30 > now) {
+                scheduleNotification(
+                        "¡Tu reserva está cerca!",
+                        "Quedan 30 minutos para que comience tu reserva.",
+                        triggerAt30 - now,
+                        reserva.getId(),
+                        "notificationWorkerId1"
+                );
+            }
+
+            // Notificación 15 minutos antes del final
+            long triggerAt15 = endDateTime.getTime() - (15 * 60 * 1000);
+            if (triggerAt15 > now) {
+                scheduleNotification(
+                        "¡Tu reserva está por terminar!",
+                        "Quedan 15 minutos para que finalice tu reserva.",
+                        triggerAt15 - now,
+                        reserva.getId(),
+                        "notificationWorkerId2"
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void scheduleNotification(String title, String message, long delayMillis, String reservationId, String workerIdType) {
+        Data data = new Data.Builder()
+                .putString(ReservationNotificationWorker.KEY_TITLE, title)
+                .putString(ReservationNotificationWorker.KEY_MESSAGE, message)
+                .build();
+
+        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ReservationNotificationWorker.class)
+                .setInputData(data)
+                .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+                .build();
+
+        String workIdString = workRequest.getId().toString();
+
+        WorkManager.getInstance(requireContext()).enqueue(workRequest);
+
+        // Llama al repositorio o ViewModel para guardar el nuevo workId (ejemplo)
+        viewModel.storeWorkerInRepository(workIdString, reservationId, workerIdType);
     }
 }

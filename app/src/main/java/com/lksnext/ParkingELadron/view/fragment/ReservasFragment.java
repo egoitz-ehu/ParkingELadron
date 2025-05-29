@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.work.WorkManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.lksnext.ParkingELadron.viewmodel.ReservasViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ReservasFragment extends Fragment {
 
@@ -76,6 +78,10 @@ public class ReservasFragment extends Fragment {
         viewModel.getErrorMessageLiveData().observe(requireActivity(), errorMessage -> {
             Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
         });
+
+        viewModel.getReservaEliminadaLiveData().observe(requireActivity(), reserva -> {
+            if(reserva!=null) eliminarNotificaciones(reserva.getNotificationWorkerId1(), reserva.getNotificationWorkerId2());
+        });
     }
 
     private void verDatos(Reserva reserva) {
@@ -98,9 +104,27 @@ public class ReservasFragment extends Fragment {
 
             @Override
             public void onDeleteReservation() {
-                viewModel.removeReservation(reserva, requireContext());
+                viewModel.removeReservation(reserva);
             }
         });
         dialog.show();
+    }
+
+    private void eliminarNotificaciones(String id1, String id2) {
+        try {
+            if (id1 != null && !id1.isEmpty()) {
+                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(id1));
+                System.out.println("Worker 1 cancelado: " + id1);
+            }
+
+            if (id2 != null && !id2.isEmpty()) {
+                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(id2));
+                System.out.println("Worker 2 cancelado: " + id2);
+            }
+
+            System.out.println("Proceso de cancelación completado");
+        } catch (Exception e) {
+            System.out.println("Error al cancelar workers: " + e.getMessage());
+        }
     }
 }
