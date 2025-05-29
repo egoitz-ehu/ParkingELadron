@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class CrearViewModel extends ViewModel {
@@ -144,6 +145,13 @@ public class CrearViewModel extends ViewModel {
                 reservaCreada.setValue(true);
                 errorMessage.setValue(null); // Sin error
                 System.out.println("Reserva editada con éxito: " + reservationId);
+                Reserva reserva = dataRepository.getReservationsLiveData().getValue().stream().filter(r -> r.getId().equals(id)).findFirst().orElse(null);
+                UUID oldWorkId1 = UUID.fromString(reserva.getNotificationWorkerId1());
+                UUID oldWorkId2 = UUID.fromString(reserva.getNotificationWorkerId2());
+                WorkManager.getInstance(context).cancelWorkById(oldWorkId1);
+                WorkManager.getInstance(context).cancelWorkById(oldWorkId2);
+                System.out.println("Worker cancelado por edicion");
+                scheduleNotificationForReserva(reserva, context);
             }
 
             @Override
@@ -173,7 +181,8 @@ public class CrearViewModel extends ViewModel {
                         "Quedan 30 minutos para que comience tu reserva.",
                         triggerAt30 - now,
                         context,
-                        reserva.getId()
+                        reserva.getId(),
+                        "notificationWorkerId1"
                 );
             }
 
@@ -185,7 +194,8 @@ public class CrearViewModel extends ViewModel {
                         "Quedan 15 minutos para que finalice tu reserva.",
                         triggerAt15 - now,
                         context,
-                        reserva.getId()
+                        reserva.getId(),
+                        "notificationWorkerId2"
                 );
             }
 
@@ -194,7 +204,7 @@ public class CrearViewModel extends ViewModel {
         }
     }
 
-    private void scheduleNotification(String title, String message, long delayMillis, Context context, String reservationId) {
+    private void scheduleNotification(String title, String message, long delayMillis, Context context, String reservationId, String t) {
         Data data = new Data.Builder()
                 .putString(ReservationNotificationWorker.KEY_TITLE, title)
                 .putString(ReservationNotificationWorker.KEY_MESSAGE, message)
@@ -209,6 +219,8 @@ public class CrearViewModel extends ViewModel {
 
         WorkManager.getInstance(context).enqueue(workRequest);
 
-        dataRepository.storeWorkerId(workIdString, reservationId);
+        dataRepository.storeWorkerId(workIdString, reservationId, t);
+
+        System.out.println("Worker creado para noti");
     }
 }

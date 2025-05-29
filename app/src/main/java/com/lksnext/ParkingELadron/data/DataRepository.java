@@ -474,9 +474,14 @@ public class DataRepository {
                 });
     }
 
-    public void storeWorkerId(String workerId, String reservationId) {
+    public void storeWorkerId(String workerId, String reservationId, String title) {
         Map<String, Object> data = new HashMap<>();
-        data.put("notificationWorkerId1", workerId);
+        data.put(title, workerId);
         firestore.collection("reservations").document(reservationId).update(data);
+        if(title.equals("notificationWorkerId1")){
+            reservationsLiveData.getValue().stream().filter(r -> r.getId().equals(reservationId)).findFirst().orElse(null).setNotificationWorkerId1(workerId);
+        }else{
+            reservationsLiveData.getValue().stream().filter(r -> r.getId().equals(reservationId)).findFirst().orElse(null).setNotificationWorkerId2(workerId);
+        }
     }
 }

@@ -98,7 +98,7 @@ public class ReservasFragment extends Fragment {
 
             @Override
             public void onDeleteReservation() {
-                viewModel.removeReservation(reserva);
+                viewModel.removeReservation(reserva, requireContext());
             }
         });
         dialog.show();
