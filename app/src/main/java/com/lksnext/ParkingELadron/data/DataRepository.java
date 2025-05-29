@@ -1,5 +1,7 @@
 package com.lksnext.ParkingELadron.data;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,10 +37,12 @@ public class DataRepository {
     private final FirebaseFirestore firestore;
 
     private MutableLiveData<List<Reserva>> reservationsLiveData;
+    private MutableLiveData<List<Plaza>> plazasLiveData;
 
     private DataRepository(FirebaseFirestore firestore) {
         this.firestore = firestore;
         reservationsLiveData = new MutableLiveData<>();
+        plazasLiveData = new MutableLiveData<>();
     }
 
     // Singleton para producción
@@ -491,5 +496,161 @@ public class DataRepository {
         }else{
             reservationsLiveData.getValue().stream().filter(r -> r.getId().equals(reservationId)).findFirst().orElse(null).setNotificationWorkerId2(workerId);
         }
+    }
+
+    public MutableLiveData<List<Plaza>> getPlazasLiveData() {
+        return plazasLiveData;
+    }
+
+    public void getParkingSpots(String parkingId, String myDay, String myStart, String myEnd){
+        // Normalizar el formato de fecha de entrada
+        String normalizedDay = normalizeDateFormat(myDay);
+        Log.d("ParkingRepo", "Buscando plazas para: parking=" + parkingId +
+                ", día original=" + myDay + ", día normalizado=" + normalizedDay +
+                ", hora=" + myStart + "-" + myEnd);
+
+        firestore.collection("parking")
+                .document(parkingId)
+                .collection("parkingSpots")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        List<Plaza> plazas = new ArrayList<>();
+                        List<DocumentSnapshot> documents = querySnapshot.getDocuments();
+
+                        for (DocumentSnapshot doc : documents) {
+                            String id = doc.getString("id");
+                            TiposPlaza type = TiposPlaza.valueOf(doc.getString("type"));
+                            boolean disponible = true; // Por defecto asumimos que está disponible
+
+                            List<Map<String, Object>> reservations = (List<Map<String, Object>>) doc.get("reservations");
+                            if (reservations != null) {
+                                for(Map<String, Object> reserva: reservations) {
+                                    String day = (String) reserva.get("day");
+                                    // Normalizar el formato de fecha de la reserva
+                                    String normalizedReservationDay = normalizeDateFormat(day);
+
+                                    String startTime = (String) reserva.get("startTime");
+                                    String endTime = (String) reserva.get("endTime");
+
+                                    Log.d("ParkingRepo", "Reserva: día original=" + day +
+                                            ", día normalizado=" + normalizedReservationDay +
+                                            ", hora=" + startTime + "-" + endTime);
+
+                                    // Comparar usando los formatos normalizados
+                                    if (normalizedReservationDay.equals(normalizedDay)) {
+                                        Log.d("ParkingRepo", "Mismo día, verificando conflicto horario");
+                                        boolean conflicto = hayConflictoHorario(startTime, endTime, myStart, myEnd);
+                                        if (conflicto) {
+                                            disponible = false; // La plaza no está disponible
+                                            Log.d("ParkingRepo", "Plaza " + id + " NO disponible por conflicto");
+                                            break; // Salimos del bucle, ya sabemos que no está disponible
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.d("ParkingRepo", "Plaza " + id + " no tiene reservas");
+                            }
+
+                            Plaza p = new Plaza(id, type, disponible);
+                            plazas.add(p);
+                            Log.d("ParkingRepo", "Plaza " + id + " disponible: " + disponible);
+                        }
+                        plazasLiveData.setValue(plazas);
+                    } else {
+                        Log.e("ParkingRepo", "Error al obtener plazas: " + task.getException().getMessage());
+                    }
+                });
+    }
+
+    /**
+     * Normaliza el formato de fecha para comparación
+     * @param dateStr La fecha en formato "dd/MM/yyyy" o "yyyy-MM-dd" o cualquier otro formato
+     * @return La fecha normalizada en formato "yyyy-MM-dd"
+     */
+    private String normalizeDateFormat(String dateStr) {
+        try {
+            // Detectar el formato de entrada
+            SimpleDateFormat inputFormatSlash = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat inputFormatHyphen = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+            Date date;
+            try {
+                // Intentar primero con formato dd/MM/yyyy
+                date = inputFormatSlash.parse(dateStr);
+            } catch (ParseException e) {
+                try {
+                    // Si falla, intentar con formato yyyy-MM-dd
+                    date = inputFormatHyphen.parse(dateStr);
+                } catch (ParseException e2) {
+                    // Si ambos fallan, registrar el error y devolver la cadena original
+                    Log.e("ParkingRepo", "Error al parsear la fecha: " + dateStr, e2);
+                    return dateStr;
+                }
+            }
+
+            // Formatear la fecha al formato estándar yyyy-MM-dd
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            Log.e("ParkingRepo", "Error al normalizar la fecha: " + dateStr, e);
+            return dateStr;
+        }
+    }
+
+    /**
+     * Verifica si hay un conflicto de horario entre dos intervalos de tiempo
+     * @param existingStart Hora de inicio de la reserva existente
+     * @param existingEnd Hora de fin de la reserva existente
+     * @param newStart Hora de inicio de la nueva reserva
+     * @param newEnd Hora de fin de la nueva reserva
+     * @return true si hay conflicto, false en caso contrario
+     */
+    private boolean hayConflictoHorario(String existingStart, String existingEnd, String newStart, String newEnd) {
+        try {
+            // Convertimos las horas a minutos para hacer la comparación más fácil
+            int existingStartMinutes = convertirHoraAMinutos(existingStart);
+            int existingEndMinutes = convertirHoraAMinutos(existingEnd);
+            int newStartMinutes = convertirHoraAMinutos(newStart);
+            int newEndMinutes = convertirHoraAMinutos(newEnd);
+
+            Log.d("HorarioDebug", "Comparando: existente[" + existingStart + "-" + existingEnd +
+                    "] (" + existingStartMinutes + "-" + existingEndMinutes + " min) vs " +
+                    "nuevo[" + newStart + "-" + newEnd +
+                    "] (" + newStartMinutes + "-" + newEndMinutes + " min)");
+
+            // Caso 1: La nueva reserva comienza durante una existente
+            boolean caso1 = newStartMinutes >= existingStartMinutes && newStartMinutes < existingEndMinutes;
+
+            // Caso 2: La nueva reserva termina durante una existente
+            boolean caso2 = newEndMinutes > existingStartMinutes && newEndMinutes <= existingEndMinutes;
+
+            // Caso 3: La nueva reserva engloba completamente una existente
+            boolean caso3 = newStartMinutes <= existingStartMinutes && newEndMinutes >= existingEndMinutes;
+
+            boolean hayConflicto = caso1 || caso2 || caso3;
+
+            Log.d("HorarioDebug", "Resultados parciales - Caso1: " + caso1 + ", Caso2: " + caso2 + ", Caso3: " + caso3);
+            Log.d("HorarioDebug", "Conflicto final: " + hayConflicto);
+
+            return hayConflicto;
+        } catch (Exception e) {
+            Log.e("ParkingRepo", "Error al verificar conflicto horario", e);
+            // En caso de error, mejor asumir que hay conflicto para ser conservadores
+            return true;
+        }
+    }
+
+    /**
+     * Convierte una hora en formato "HH:mm" a minutos totales desde media noche
+     * @param hora Hora en formato "HH:mm"
+     * @return Minutos totales desde media noche
+     */
+    private int convertirHoraAMinutos(String hora) {
+        String[] partes = hora.split(":");
+        int horas = Integer.parseInt(partes[0]);
+        int minutos = Integer.parseInt(partes[1]);
+        return horas * 60 + minutos;
     }
 }
