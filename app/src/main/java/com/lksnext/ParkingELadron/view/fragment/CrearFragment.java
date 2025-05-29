@@ -3,6 +3,7 @@ package com.lksnext.ParkingELadron.view.fragment;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -25,6 +26,7 @@ import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentCrearBinding;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
+import com.lksnext.ParkingELadron.view.activity.SelectParkingActivity;
 import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
 import com.lksnext.ParkingELadron.workers.ReservationNotificationWorker;
 
@@ -247,6 +249,12 @@ public class CrearFragment extends Fragment {
             if (event.reserva != null) {
                 scheduleNotificationForReserva(event.reserva);
             }
+        });
+
+        binding.btnSeleccionar.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), SelectParkingActivity.class);
+            intent.putExtra(SelectParkingActivity.EXTRA_PARKING_ID, "defaultParking");
+            startActivity(intent);
         });
     }
 
