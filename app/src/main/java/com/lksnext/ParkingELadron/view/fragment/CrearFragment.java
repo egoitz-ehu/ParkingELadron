@@ -198,21 +198,10 @@ public class CrearFragment extends Fragment {
             if(reserva == null) {
                 viewModel.crearReserva(FirebaseAuth.getInstance().getUid());
                 // Observa si la reserva fue creada con éxito
-                viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
-                    if(isCreated) {
+                viewModel.getReservaCreada().observe(getViewLifecycleOwner(), reserva1 -> {
+                    if(reserva1 != null) {
                         Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
                         resetForm(); // Restablece los campos para permitir crear otra reserva
-                    } else {
-                        if(isCreated) {
-                            new AlertDialog
-                                    .Builder(requireContext())
-                                    .setTitle(R.string.title_editado)
-                                    .setMessage(R.string.reserva_editado)
-                                    .setPositiveButton(R.string.editar_si, (dialog, which)-> {
-                                        requireActivity().getSupportFragmentManager().popBackStack();
-                                    })
-                                    .show();
-                        }
                     }
                 });
 
@@ -226,31 +215,17 @@ public class CrearFragment extends Fragment {
                         .setMessage(R.string.editar_preguntar)
                         .setPositiveButton(R.string.editar_si, (dialog, which) -> {
                             viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId());
-                            viewModel.getReservaCreada().observe(getViewLifecycleOwner(), isCreated -> {
-                                if(isCreated) {
+                            viewModel.getReservaCreada().observe(getViewLifecycleOwner(), reserva1 -> {
+                                if(reserva1 != null) {
                                     Toast.makeText(getContext(), "Reserva editada con éxito", Toast.LENGTH_SHORT).show();
                                     requireActivity().getSupportFragmentManager().popBackStack();
+                                    scheduleNotificationForReserva(reserva1);
+
                                 }
                             });
                         })
                         .setNegativeButton(R.string.editar_no, null)
                         .show();
-            }
-        });
-
-        viewModel.getWorkerEvent().observe(getViewLifecycleOwner(), event -> {
-            if (event == null) return;
-
-            if (event.cancelWorkId1 != null && !event.cancelWorkId1.isEmpty()) {
-                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(event.cancelWorkId1));
-            }
-            if (event.cancelWorkId2 != null && !event.cancelWorkId2.isEmpty()) {
-                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(event.cancelWorkId2));
-            }
-
-            // 2. Si hay reserva, programa nuevas notificaciones
-            if (event.reserva != null) {
-                scheduleNotificationForReserva(event.reserva);
             }
         });
 
@@ -265,6 +240,18 @@ public class CrearFragment extends Fragment {
                 intent.putExtra(SelectParkingActivity.EXTRA_START_TIME, viewModel.getHoraInicio().getValue());
                 intent.putExtra(SelectParkingActivity.EXTRA_END_TIME, viewModel.getHoraFin().getValue());
                 startActivity(intent);
+            }
+        });
+
+        viewModel.getWorkerId1().observe(requireActivity(), id -> {
+            if (id != null && !id.isEmpty()) {
+                eliminarNotificaciones(id);
+            }
+        });
+
+        viewModel.getWorkerId2().observe(requireActivity(), id -> {
+            if (id != null && !id.isEmpty()) {
+                eliminarNotificaciones(id);
             }
         });
     }
@@ -332,5 +319,17 @@ public class CrearFragment extends Fragment {
 
         // Llama al repositorio o ViewModel para guardar el nuevo workId (ejemplo)
         viewModel.storeWorkerInRepository(workIdString, reservationId, workerIdType);
+    }
+
+    private void eliminarNotificaciones(String id) {
+        try {
+            if (id != null && !id.isEmpty()) {
+                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(id));
+                System.out.println("Worker cancelado: " + id);
+            }
+            System.out.println("Proceso de cancelación completado");
+        } catch (Exception e) {
+            System.out.println("Error al cancelar workers: " + e.getMessage());
+        }
     }
 }
