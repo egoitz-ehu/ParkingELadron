@@ -18,7 +18,7 @@ import com.lksnext.ParkingELadron.viewmodel.ParkingSpotViewModel;
 
 import java.util.ArrayList;
 
-public class SelectParkingActivity extends AppCompatActivity implements ParkingSpotAdapter.OnParkingSpotClickListener {
+public class SelectParkingSpotActivity extends AppCompatActivity implements ParkingSpotAdapter.OnParkingSpotClickListener {
 
     private ParkingSpotViewModel viewModel;
     private RecyclerView rvParkingSpots;

@@ -102,7 +102,7 @@ public class CrearViewModel extends ViewModel {
     }
 
 
-    public void editarReserva(String id, String oldSpot) {
+    public void editarReserva(String id, String oldSpot, Reserva oldReserva) {
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
             reservaCreada.setValue(null);
@@ -123,7 +123,8 @@ public class CrearViewModel extends ViewModel {
         String inicioIso = DateUtil.toUtcIsoString(date.getValue(), horaInicioStr);
         String finIso = DateUtil.toUtcIsoString(date.getValue(), horaFinStr);
 
-        dataRepository.editReservation(id, formattedDate, finIso, "defaultParking", type.getValue(), inicioIso, oldSpot, new DataRepository.OnReservationCompleteListener() {
+        dataRepository.editReservation(id, formattedDate, finIso, "defaultParking", type.getValue(), inicioIso, oldSpot
+                , dateFormat.format(oldReserva.getFecha()), oldReserva.getHoraInicio(), oldReserva.getHoraFin(), new DataRepository.OnReservationCompleteListener() {
             @Override
             public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
                 // Obtener la reserva original para los WorkerIds

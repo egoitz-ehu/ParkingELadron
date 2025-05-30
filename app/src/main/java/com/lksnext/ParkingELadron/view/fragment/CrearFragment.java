@@ -1,11 +1,14 @@
 package com.lksnext.ParkingELadron.view.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.Data;
@@ -17,17 +20,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentCrearBinding;
 import com.lksnext.ParkingELadron.domain.DateUtil;
+import com.lksnext.ParkingELadron.domain.Plaza;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
-import com.lksnext.ParkingELadron.view.activity.SelectParkingActivity;
+import com.lksnext.ParkingELadron.view.activity.SelectParkingSpotActivity;
 import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
 import com.lksnext.ParkingELadron.workers.ReservationNotificationWorker;
 
@@ -35,7 +37,6 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.UUID;
@@ -45,6 +46,19 @@ public class CrearFragment extends Fragment {
 
     private FragmentCrearBinding binding;
     private CrearViewModel viewModel;
+
+    private final ActivityResultLauncher<Intent> selectSpotLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Plaza plaza = (Plaza) result.getData().getSerializableExtra(SelectParkingSpotActivity.EXTRA_SELECTED_SPOT);
+                    if (plaza != null) {
+                        // Aquí tienes la plaza seleccionada, puedes guardar el id o actualizar el ViewModel
+                        Toast.makeText(getContext(), "Plaza seleccionada: " + plaza.getId(), Toast.LENGTH_SHORT).show();
+                        // Por ejemplo:
+                        // viewModel.setPlazaSeleccionada(plaza);
+                    }
+                }
+            });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -214,7 +228,7 @@ public class CrearFragment extends Fragment {
                         .setTitle(R.string.editart_btn)
                         .setMessage(R.string.editar_preguntar)
                         .setPositiveButton(R.string.editar_si, (dialog, which) -> {
-                            viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId());
+                            viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId(), reserva);
                             viewModel.getReservaCreada().observe(getViewLifecycleOwner(), reserva1 -> {
                                 if(reserva1 != null) {
                                     Toast.makeText(getContext(), "Reserva editada con éxito", Toast.LENGTH_SHORT).show();
@@ -231,15 +245,15 @@ public class CrearFragment extends Fragment {
 
         binding.btnSeleccionar.setOnClickListener(v -> {
             if(!(viewModel.getHoraInicio().getValue() == null || viewModel.getHoraFin().getValue() == null || viewModel.getDate().getValue() == null)){
-                Intent intent = new Intent(getContext(), SelectParkingActivity.class);
-                intent.putExtra(SelectParkingActivity.EXTRA_PARKING_ID, "defaultParking");
+                Intent intent = new Intent(getContext(), SelectParkingSpotActivity.class);
+                intent.putExtra(SelectParkingSpotActivity.EXTRA_PARKING_ID, "defaultParking");
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 String formattedDate = dateFormat.format(viewModel.getDate().getValue());
-                intent.putExtra(SelectParkingActivity.EXTRA_SELECTED_DATE, formattedDate);
+                intent.putExtra(SelectParkingSpotActivity.EXTRA_SELECTED_DATE, formattedDate);
 
-                intent.putExtra(SelectParkingActivity.EXTRA_START_TIME, viewModel.getHoraInicio().getValue());
-                intent.putExtra(SelectParkingActivity.EXTRA_END_TIME, viewModel.getHoraFin().getValue());
-                startActivity(intent);
+                intent.putExtra(SelectParkingSpotActivity.EXTRA_START_TIME, viewModel.getHoraInicio().getValue());
+                intent.putExtra(SelectParkingSpotActivity.EXTRA_END_TIME, viewModel.getHoraFin().getValue());
+                selectSpotLauncher.launch(intent);
             }
         });
 
