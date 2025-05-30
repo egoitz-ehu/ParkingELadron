@@ -82,8 +82,12 @@ public class ReservasFragment extends Fragment {
             Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
         });
 
-        viewModel.getReservaEliminadaLiveData().observe(requireActivity(), reserva -> {
-            if(reserva!=null) eliminarNotificaciones(reserva.getNotificationWorkerId1(), reserva.getNotificationWorkerId2());
+        viewModel.getIdWorkerId1().observe(requireActivity(),id->{
+            if(id!=null) eliminarNotificaciones(id);
+        });
+
+        viewModel.getIdWorkerId2().observe(requireActivity(),id->{
+            if(id!=null) eliminarNotificaciones(id);
         });
 
         String[] tipos = {
@@ -161,18 +165,12 @@ public class ReservasFragment extends Fragment {
         dialog.show();
     }
 
-    private void eliminarNotificaciones(String id1, String id2) {
+    private void eliminarNotificaciones(String id) {
         try {
-            if (id1 != null && !id1.isEmpty()) {
-                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(id1));
-                System.out.println("Worker 1 cancelado: " + id1);
+            if (id != null && !id.isEmpty()) {
+                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(id));
+                System.out.println("Worker cancelado: " + id);
             }
-
-            if (id2 != null && !id2.isEmpty()) {
-                WorkManager.getInstance(requireContext()).cancelWorkById(UUID.fromString(id2));
-                System.out.println("Worker 2 cancelado: " + id2);
-            }
-
             System.out.println("Proceso de cancelación completado");
         } catch (Exception e) {
             System.out.println("Error al cancelar workers: " + e.getMessage());

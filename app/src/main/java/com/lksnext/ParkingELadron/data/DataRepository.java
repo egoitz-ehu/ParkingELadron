@@ -15,6 +15,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.lksnext.ParkingELadron.domain.DateUtil;
 import com.lksnext.ParkingELadron.domain.EstadoReserva;
 import com.lksnext.ParkingELadron.domain.Plaza;
 import com.lksnext.ParkingELadron.domain.Reserva;
@@ -23,6 +24,8 @@ import com.lksnext.ParkingELadron.domain.TiposPlaza;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -178,7 +181,7 @@ public class DataRepository {
                                             Map<String, Object> spot = spotDoc.getData();
                                             List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
 
-                                            if (isSpotAvailable(reservations, day, startTime, endTime, null)) {
+                                            if (isSpotAvailable(reservations, startTime, endTime, null)) {
                                                 reservationCreated.set(true);
                                                 createReservation(parkingId, spotDoc.getId(), day, startTime, endTime, userId, type, listener);
                                                 return; // No seguir buscando en este parking
@@ -252,7 +255,7 @@ public class DataRepository {
                 .addOnFailureListener(e -> listener.onReservationFailed("Error al actualizar la plaza: " + e.getMessage()));
     }
 
-    public boolean isSpotAvailable(List<Map<String, Object>> reservations, String day, String startTime, String endTime, @Nullable String ignoreReservationId) {
+    public boolean isSpotAvailable(List<Map<String, Object>> reservations,  String startTimeIso, String endTimeIso, @Nullable String ignoreReservationId) {
         if (reservations == null || reservations.isEmpty()) {
             return true;
         }
@@ -262,11 +265,10 @@ public class DataRepository {
             if (ignoreReservationId != null && ignoreReservationId.equals(reservationId)) {
                 continue; // Ignora la reserva actual
             }
-            String reservedDay = (String) reservation.get("day");
-            String reservedStartTime = (String) reservation.get("startTime");
-            String reservedEndTime = (String) reservation.get("endTime");
+            String reservedStartIso = (String) reservation.get("startTime");
+            String reservedEndIso = (String) reservation.get("endTime");
 
-            if (reservedDay.equals(day) && timeOverlaps(startTime, endTime, reservedStartTime, reservedEndTime)) {
+            if (DateUtil.timeOverlapsIso(startTimeIso, endTimeIso, reservedStartIso, reservedEndIso)) {
                 return false;
             }
         }
@@ -303,60 +305,58 @@ public class DataRepository {
                         List<DocumentSnapshot> documents = querySnapshot.getDocuments();
                         List<Reserva> reservations = new ArrayList<>();
                         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                         Date now = new Date();
 
                         for (DocumentSnapshot doc : documents) {
                             try {
                                 // Parse datos
                                 Date day = format.parse(doc.getString("day"));
-                                String startTime = doc.getString("startTime");
-                                String endTime = doc.getString("endTime");
+                                String startTimeIso = doc.getString("startTime");
+                                String endTimeIso = doc.getString("endTime");
                                 String spotTypeStr = doc.getString("spotType");
                                 EstadoReserva estado = EstadoReserva.valueOf(doc.getString("state"));
 
-                                // Construir fechas completas
-                                String dayStr = doc.getString("day");
-                                Date startDateTime = dateTimeFormat.parse(dayStr + " " + startTime);
-                                Date endDateTime = dateTimeFormat.parse(dayStr + " " + endTime);
+                                // Parsear los ISO a Date para comparar con now
+                                ZonedDateTime startZdt = ZonedDateTime.parse(startTimeIso, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                                ZonedDateTime endZdt = ZonedDateTime.parse(endTimeIso, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                                Date startDateTime = java.util.Date.from(startZdt.toInstant());
+                                Date endDateTime = java.util.Date.from(endZdt.toInstant());
 
                                 // Lógica de actualización de estado
                                 EstadoReserva nuevoEstado = estado;
                                 if (now.after(startDateTime) && now.before(endDateTime)) {
-                                    // Activa
                                     if (estado != EstadoReserva.EN_MARCHA) {
                                         nuevoEstado = EstadoReserva.EN_MARCHA;
-                                        // Actualizar en Firestore si quieres persistir el cambio
                                         doc.getReference().update("state", EstadoReserva.EN_MARCHA.toString());
                                     }
                                 } else if (now.after(endDateTime)) {
-                                    // Finalizada
                                     if (estado != EstadoReserva.Finalizado) {
                                         nuevoEstado = EstadoReserva.Finalizado;
-                                        // Actualizar en Firestore si quieres persistir el cambio
                                         doc.getReference().update("state", EstadoReserva.Finalizado.toString());
                                     }
                                 } else {
-                                    // Pendiente o Reservada
                                     if (estado != EstadoReserva.Reservado) {
                                         nuevoEstado = EstadoReserva.Reservado;
                                         doc.getReference().update("state", EstadoReserva.Reservado.toString());
                                     }
                                 }
-
+                                String workerId1 = doc.getString("notificationWorkerId1");
+                                String workerId2 = doc.getString("notificationWorkerId2");
                                 Reserva r = new Reserva(
                                         day,
-                                        startTime,
-                                        endTime,
+                                        startTimeIso,
+                                        endTimeIso,
                                         new Plaza(doc.getString("spotId"), TiposPlaza.valueOf(spotTypeStr)),
                                         doc.getString("userId"),
                                         nuevoEstado,
                                         doc.getId(),
                                         doc.getString("parkingId")
                                 );
+                                r.setNotificationWorkerId1(workerId1);
+                                r.setNotificationWorkerId2(workerId2);
                                 reservations.add(r);
-                            } catch (ParseException e) {
-                                System.out.println("Problema al parsear date");
+                            } catch (Exception e) {
+                                System.out.println("Problema al parsear date o ISO");
                             }
                         }
                         reservationsLiveData.setValue(reservations);
@@ -413,7 +413,7 @@ public class DataRepository {
                             Map<String, Object> spot = spotDoc.getData();
                             List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
 
-                            if (isSpotAvailable(reservations, day, startTime, endTime, oldId)) {
+                            if (isSpotAvailable(reservations, startTime, endTime, oldId)) {
                                 reservationCreated.set(true);
                                 updateReservation(oldId, parkingId,spotId, day, startTime, endTime, type, spotDoc.getId(), listener);
                                 return; // No seguir buscando en este parking
@@ -491,10 +491,20 @@ public class DataRepository {
         Map<String, Object> data = new HashMap<>();
         data.put(title, workerId);
         firestore.collection("reservations").document(reservationId).update(data);
-        if(title.equals("notificationWorkerId1")){
-            reservationsLiveData.getValue().stream().filter(r -> r.getId().equals(reservationId)).findFirst().orElse(null).setNotificationWorkerId1(workerId);
-        }else{
-            reservationsLiveData.getValue().stream().filter(r -> r.getId().equals(reservationId)).findFirst().orElse(null).setNotificationWorkerId2(workerId);
+
+        List<Reserva> reservas = reservationsLiveData.getValue();
+        if (reservas != null) {
+            Reserva reserva = reservas.stream()
+                    .filter(r -> r.getId().equals(reservationId))
+                    .findFirst()
+                    .orElse(null);
+            if (reserva != null) {
+                if (title.equals("notificationWorkerId1")) {
+                    reserva.setNotificationWorkerId1(workerId);
+                } else {
+                    reserva.setNotificationWorkerId2(workerId);
+                }
+            }
         }
     }
 

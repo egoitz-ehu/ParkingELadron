@@ -3,8 +3,11 @@ package com.lksnext.ParkingELadron.view.dialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.TimeUtils;
+
 import androidx.annotation.NonNull;
 import com.lksnext.ParkingELadron.databinding.DialogReservaBinding;
+import com.lksnext.ParkingELadron.domain.DateUtil;
 import com.lksnext.ParkingELadron.domain.Reserva;
 
 import java.text.SimpleDateFormat;
@@ -33,9 +36,7 @@ public class ReservaDialog extends Dialog {
         setContentView(binding.getRoot());
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
         binding.tvDia.setText(format.format(reserva.getFecha()));
-        binding.tvHoras.setText(reserva.getHoraInicio() + "-" + reserva.getHoraFin());
-        binding.tvParking.setText(reserva.getParkingId());
-        binding.tvSpot.setText(reserva.getPlaza().getId());
+        binding.tvHoras.setText(DateUtil.isoToLocalHour(reserva.getHoraInicio())+"-"+DateUtil.isoToLocalHour(reserva.getHoraFin()));
         binding.btnEdit.setOnClickListener(v->{
             listener.onEditReservation();
             dismiss();

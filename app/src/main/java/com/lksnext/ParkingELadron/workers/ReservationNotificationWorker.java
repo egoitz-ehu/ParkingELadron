@@ -3,7 +3,6 @@ package com.lksnext.ParkingELadron.workers;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
@@ -19,6 +18,7 @@ import com.lksnext.ParkingELadron.R;
 public class ReservationNotificationWorker extends Worker {
     public static final String KEY_TITLE = "KEY_TITLE";
     public static final String KEY_MESSAGE = "KEY_MESSAGE";
+    public static final String KEY_NOTIFICATION_ID = "KEY_NOTIFICATION_ID"; // Opcional
 
     public ReservationNotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -29,9 +29,14 @@ public class ReservationNotificationWorker extends Worker {
     public Result doWork() {
         String title = getInputData().getString(KEY_TITLE);
         String message = getInputData().getString(KEY_MESSAGE);
+        int notificationId = getInputData().getInt(KEY_NOTIFICATION_ID, (int) System.currentTimeMillis());
+
+        if (title == null || message == null) {
+            Log.e("ReservationWorker", "Faltan datos para la notificación");
+            return Result.failure();
+        }
 
         Context context = getApplicationContext();
-
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -45,20 +50,16 @@ public class ReservationNotificationWorker extends Worker {
             notificationManager.createNotificationChannel(channel);
         }
 
-        // smallIcon: blanco con P negra (vector XML en res/drawable/ic_parking_notification.xml)
-        // largeIcon: icono a color, PNG recomendado en res/drawable/ic_parking_colored.png
-       // Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_parking_colored);
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_parking_notification)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_parking_colored))
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                // Opcional: color de acento para la barra/círculo
                 .setColor(ContextCompat.getColor(context, R.color.mainOrange));
 
-        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        notificationManager.notify(notificationId, builder.build());
         Log.d("ReservationWorker", "¡El Worker ha ejecutado la notificación!");
         return Result.success();
     }
