@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentCrearBinding;
+import com.lksnext.ParkingELadron.domain.DateUtil;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.domain.TiposPlaza;
 import com.lksnext.ParkingELadron.view.activity.SelectParkingActivity;
@@ -31,6 +32,8 @@ import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
 import com.lksnext.ParkingELadron.workers.ReservationNotificationWorker;
 
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -59,8 +62,8 @@ public class CrearFragment extends Fragment {
         if(getArguments() != null && getArguments().containsKey("reserva")) {
             reserva = (Reserva) getArguments().getSerializable("reserva");
             viewModel.setDate(reserva.getFecha());
-            viewModel.setHoraInicio(reserva.getHoraInicio());
-            viewModel.setHoraFin(reserva.getHoraFin());
+            viewModel.setHoraInicio(DateUtil.isoToLocalHour(reserva.getHoraInicio()));
+            viewModel.setHoraFin(DateUtil.isoToLocalHour(reserva.getHoraFin()));
             viewModel.setType(reserva.getPlaza().getType());
             binding.btnCrear.setText(R.string.editart_btn);
         } else {
@@ -275,19 +278,17 @@ public class CrearFragment extends Fragment {
     }
 
     private void scheduleNotificationForReserva(Reserva reserva) {
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String dayStr = dateFormat.format(reserva.getFecha());
-        String startTime = reserva.getHoraInicio();
-        String endTime = reserva.getHoraFin();
-
         try {
-            Date startDateTime = dateTimeFormat.parse(dayStr + " " + startTime);
-            Date endDateTime = dateTimeFormat.parse(dayStr + " " + endTime);
+            // Parsear los strings ISO a ZonedDateTime
+            ZonedDateTime startZdt = ZonedDateTime.parse(reserva.getHoraInicio(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            ZonedDateTime endZdt = ZonedDateTime.parse(reserva.getHoraFin(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
             long now = System.currentTimeMillis();
+            long startMillis = startZdt.toInstant().toEpochMilli();
+            long endMillis = endZdt.toInstant().toEpochMilli();
 
             // Notificación 30 minutos antes del inicio
-            long triggerAt30 = startDateTime.getTime() - (30 * 60 * 1000);
+            long triggerAt30 = startMillis - (30 * 60 * 1000);
             if (triggerAt30 > now) {
                 scheduleNotification(
                         "¡Tu reserva está cerca!",
@@ -299,7 +300,7 @@ public class CrearFragment extends Fragment {
             }
 
             // Notificación 15 minutos antes del final
-            long triggerAt15 = endDateTime.getTime() - (15 * 60 * 1000);
+            long triggerAt15 = endMillis - (15 * 60 * 1000);
             if (triggerAt15 > now) {
                 scheduleNotification(
                         "¡Tu reserva está por terminar!",

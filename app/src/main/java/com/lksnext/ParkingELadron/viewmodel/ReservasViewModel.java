@@ -20,10 +20,19 @@ public class ReservasViewModel extends ViewModel {
 
     private final MutableLiveData<String> errorMessageLiveData = new MutableLiveData<>();
 
-    private MutableLiveData<Reserva> reservaEliminadaLiveData = new MutableLiveData<>();
+    private MutableLiveData<String> idWorkerId1 = new MutableLiveData<>();
+    private MutableLiveData<String> idWorkerId2 = new MutableLiveData<>();
 
     public ReservasViewModel() {
         this(DataRepository.getInstance());
+    }
+
+    public MutableLiveData<String> getIdWorkerId1() {
+        return idWorkerId1;
+    }
+
+    public MutableLiveData<String> getIdWorkerId2() {
+        return idWorkerId2;
     }
 
     public ReservasViewModel(DataRepository dataRepository) {
@@ -42,15 +51,14 @@ public class ReservasViewModel extends ViewModel {
         return errorMessageLiveData;
     }
 
-    public LiveData<Reserva> getReservaEliminadaLiveData() {
-        return reservaEliminadaLiveData;
-    }
-
     public void removeReservation(Reserva reserva) {
+        String id1 = reserva.getNotificationWorkerId1();
+        String id2 = reserva.getNotificationWorkerId2();
         dataRepository.deleteReservation(reserva, new DataRepository.OnReservationRemoveListener() {
             @Override
             public void onReservationRemoveSuccess() {
-                reservaEliminadaLiveData.setValue(reserva);
+                idWorkerId1.setValue(id1);
+                idWorkerId2.setValue(id2);
             }
 
             @Override

@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.ItemReservaBinding;
+import com.lksnext.ParkingELadron.domain.DateUtil;
 import com.lksnext.ParkingELadron.domain.Reserva;
 
 import java.text.SimpleDateFormat;
@@ -22,7 +23,9 @@ public class ReservaViewHolder extends RecyclerView.ViewHolder {
     public void bind(Reserva reserva, OnItemClickListener listener){
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
         binding.tvDate.setText(format.format(reserva.getFecha()));
-        binding.tvHour.setText(reserva.getHoraInicio() + "-" + reserva.getHoraFin());
+        String horaInicio = DateUtil.isoToLocalHour(reserva.getHoraInicio());
+        String horaFin = DateUtil.isoToLocalHour(reserva.getHoraFin());
+        binding.tvHour.setText(horaInicio + "-" + horaFin);
         switch (reserva.getEstado()) {
             case Reservado:
                 binding.tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.reservaReservado));

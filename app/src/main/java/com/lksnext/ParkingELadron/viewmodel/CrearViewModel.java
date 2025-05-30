@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.lksnext.ParkingELadron.data.DataRepository;
+import com.lksnext.ParkingELadron.domain.DateUtil;
 import com.lksnext.ParkingELadron.domain.EstadoReserva;
 import com.lksnext.ParkingELadron.domain.Plaza;
 import com.lksnext.ParkingELadron.domain.Reserva;
@@ -59,20 +60,22 @@ public class CrearViewModel extends ViewModel {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String formattedDate = dateFormat.format(date.getValue());
+        String inicioIso = DateUtil.toUtcIsoString(date.getValue(), horaInicio.getValue());
+        String finIso = DateUtil.toUtcIsoString(date.getValue(), horaFin.getValue());
 
         dataRepository.findAndCreateReservation(
                 type.getValue().toString(),
                 formattedDate,
-                horaInicio.getValue(),
-                horaFin.getValue(),
+                inicioIso,
+                finIso,
                 userId,
                 new DataRepository.OnReservationCompleteListener() {
                     @Override
                     public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
                         Reserva reserva = new Reserva(
                                 date.getValue(),
-                                horaInicio.getValue(),
-                                horaFin.getValue(),
+                                inicioIso,
+                                finIso,
                                 new Plaza(spotId, type.getValue()),
                                 FirebaseAuth.getInstance().getUid(),
                                 EstadoReserva.Reservado,
@@ -101,7 +104,20 @@ public class CrearViewModel extends ViewModel {
         }
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String formattedDate = dateFormat.format(date.getValue());
-        dataRepository.editReservation(id, formattedDate, horaFin.getValue(), "defaultParking", type.getValue(), horaInicio.getValue(), oldSpot, new DataRepository.OnReservationCompleteListener() {
+        String horaInicioStr = horaInicio.getValue();
+        String horaFinStr = horaFin.getValue();
+
+        if (horaInicioStr != null && horaInicioStr.contains("T")) {
+            horaInicioStr = DateUtil.isoToLocalHour(horaInicioStr);
+        }
+        if (horaFinStr != null && horaFinStr.contains("T")) {
+            horaFinStr = DateUtil.isoToLocalHour(horaFinStr);
+        }
+
+        String inicioIso = DateUtil.toUtcIsoString(date.getValue(), horaInicioStr);
+        String finIso = DateUtil.toUtcIsoString(date.getValue(), horaFinStr);
+
+        dataRepository.editReservation(id, formattedDate, finIso, "defaultParking", type.getValue(), inicioIso, oldSpot, new DataRepository.OnReservationCompleteListener() {
             @Override
             public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
                 // Obtener la reserva original para los WorkerIds
@@ -114,8 +130,8 @@ public class CrearViewModel extends ViewModel {
                 // CREAR RESERVA NUEVA CON LOS VALORES ACTUALIZADOS
                 Reserva reservaActualizada = new Reserva(
                         date.getValue(),  // Los valores del ViewModel (actualizados)
-                        horaInicio.getValue(),
-                        horaFin.getValue(),
+                        inicioIso,
+                        finIso,
                         new Plaza(spotId, type.getValue()),
                         FirebaseAuth.getInstance().getUid(),
                         EstadoReserva.Reservado,
