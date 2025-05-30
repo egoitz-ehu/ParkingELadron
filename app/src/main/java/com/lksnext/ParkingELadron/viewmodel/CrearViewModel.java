@@ -22,11 +22,19 @@ public class CrearViewModel extends ViewModel {
     private final MutableLiveData<String> horaInicio = new MutableLiveData<>();
     private final MutableLiveData<String> horaFin = new MutableLiveData<>();
     private final MutableLiveData<TiposPlaza> type = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> reservaCreada = new MutableLiveData<>();
+    private final MutableLiveData<Reserva> reservaCreada = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<String> workerId1 = new MutableLiveData<>();
 
-    // Para comunicar los WorkerIDs a cancelar/crear
-    private final MutableLiveData<WorkerNotificationEvent> workerEvent = new MutableLiveData<>();
+    public MutableLiveData<String> getWorkerId1() {
+        return workerId1;
+    }
+
+    public MutableLiveData<String> getWorkerId2() {
+        return workerId2;
+    }
+
+    private final MutableLiveData<String> workerId2 = new MutableLiveData<>();
 
     private final DataRepository dataRepository;
 
@@ -46,15 +54,14 @@ public class CrearViewModel extends ViewModel {
     public void setHoraFin(String horaFin) { this.horaFin.setValue(horaFin); }
     public LiveData<TiposPlaza> getType() { return type; }
     public void setType(TiposPlaza type) { this.type.setValue(type); }
-    public LiveData<Boolean> getReservaCreada() { return reservaCreada; }
+    public LiveData<Reserva> getReservaCreada() { return reservaCreada; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
-    public LiveData<WorkerNotificationEvent> getWorkerEvent() { return workerEvent; }
 
 
     public void crearReserva(String userId) {
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
-            reservaCreada.setValue(false);
+            reservaCreada.setValue(null);
             return;
         }
 
@@ -83,13 +90,12 @@ public class CrearViewModel extends ViewModel {
                                 parkingId
                         );
                         // Notifica al Fragment para programar workers
-                        workerEvent.postValue(new WorkerNotificationEvent(reserva, null, null));
-                        reservaCreada.setValue(true);
+                        reservaCreada.setValue(reserva);
                         errorMessage.setValue(null);
                     }
                     @Override
                     public void onReservationFailed(String ms) {
-                        reservaCreada.postValue(false);
+                        reservaCreada.postValue(null);
                         errorMessage.setValue(ms);
                     }
                 });
@@ -99,7 +105,7 @@ public class CrearViewModel extends ViewModel {
     public void editarReserva(String id, String oldSpot) {
         if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
-            reservaCreada.setValue(false);
+            reservaCreada.setValue(null);
             return;
         }
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -139,13 +145,11 @@ public class CrearViewModel extends ViewModel {
                         parkingId
                 );
 
-                // Pasamos los worker IDs antiguos a la reserva actualizada
-                reservaActualizada.setNotificationWorkerId1(oldWorkId1);
-                reservaActualizada.setNotificationWorkerId2(oldWorkId2);
+                workerId1.setValue(oldWorkId1);
+                workerId2.setValue(oldWorkId2);
 
                 // Notifica al Fragment con la RESERVA ACTUALIZADA
-                workerEvent.postValue(new WorkerNotificationEvent(reservaActualizada, oldWorkId1, oldWorkId2));
-                reservaCreada.setValue(true);
+                reservaCreada.setValue(reservaActualizada);
                 errorMessage.setValue(null);
             }
 
@@ -154,17 +158,6 @@ public class CrearViewModel extends ViewModel {
                 errorMessage.setValue(err);
             }
         });
-    }
-
-    public static class WorkerNotificationEvent {
-        public final Reserva reserva;
-        public final String cancelWorkId1;
-        public final String cancelWorkId2;
-        public WorkerNotificationEvent(Reserva reserva, String cancelWorkId1, String cancelWorkId2) {
-            this.reserva = reserva;
-            this.cancelWorkId1 = cancelWorkId1;
-            this.cancelWorkId2 = cancelWorkId2;
-        }
     }
 
     public void storeWorkerInRepository(String workerId, String reservaId, String type) {
