@@ -21,9 +21,9 @@ public class CrearViewModel extends ViewModel {
     private final MutableLiveData<Date> date = new MutableLiveData<>();
     private final MutableLiveData<String> horaInicio = new MutableLiveData<>();
     private final MutableLiveData<String> horaFin = new MutableLiveData<>();
-    private final MutableLiveData<TiposPlaza> type = new MutableLiveData<>();
     private final MutableLiveData<Reserva> reservaCreada = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<Plaza> plazaSeleccionada = new MutableLiveData<>();
     private final MutableLiveData<String> workerId1 = new MutableLiveData<>();
 
     public MutableLiveData<String> getWorkerId1() {
@@ -52,14 +52,19 @@ public class CrearViewModel extends ViewModel {
     public void setHoraInicio(String horaInicio) { this.horaInicio.setValue(horaInicio); }
     public LiveData<String> getHoraFin() { return horaFin; }
     public void setHoraFin(String horaFin) { this.horaFin.setValue(horaFin); }
-    public LiveData<TiposPlaza> getType() { return type; }
-    public void setType(TiposPlaza type) { this.type.setValue(type); }
     public LiveData<Reserva> getReservaCreada() { return reservaCreada; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
 
+    public LiveData<Plaza> getPlazaSeleccionada() {
+        return plazaSeleccionada;
+    }
+
+    public void setPlazaSeleccionada(Plaza plaza) {
+        this.plazaSeleccionada.setValue(plaza);
+    }
 
     public void crearReserva(String userId) {
-        if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
+        if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || plazaSeleccionada.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
             reservaCreada.setValue(null);
             return;
@@ -69,41 +74,45 @@ public class CrearViewModel extends ViewModel {
         String formattedDate = dateFormat.format(date.getValue());
         String inicioIso = DateUtil.toUtcIsoString(date.getValue(), horaInicio.getValue());
         String finIso = DateUtil.toUtcIsoString(date.getValue(), horaFin.getValue());
-
-        dataRepository.findAndCreateReservation(
-                type.getValue().toString(),
-                formattedDate,
-                inicioIso,
-                finIso,
-                userId,
-                new DataRepository.OnReservationCompleteListener() {
-                    @Override
-                    public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
-                        Reserva reserva = new Reserva(
-                                date.getValue(),
-                                inicioIso,
-                                finIso,
-                                new Plaza(spotId, type.getValue()),
-                                FirebaseAuth.getInstance().getUid(),
-                                EstadoReserva.Reservado,
-                                reservationId,
-                                parkingId
-                        );
-                        // Notifica al Fragment para programar workers
-                        reservaCreada.setValue(reserva);
-                        errorMessage.setValue(null);
+        // Si se ha seleccionado una plaza, crea la reserva directamente
+        dataRepository.createReservation(
+                    "defaultParking",
+                    this.plazaSeleccionada.getValue().getId(),
+                    formattedDate,
+                    inicioIso,
+                    finIso,
+                    userId,
+                    plazaSeleccionada.getValue().getType().toString(),
+                    new DataRepository.OnReservationCompleteListener() {
+                        @Override
+                        public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
+                            Reserva reserva = new Reserva(
+                                    date.getValue(),
+                                    inicioIso,
+                                    finIso,
+                                    plazaSeleccionada.getValue(),
+                                    FirebaseAuth.getInstance().getUid(),
+                                    EstadoReserva.Reservado,
+                                    reservationId,
+                                    parkingId
+                            );
+                            // Notifica al Fragment para programar workers
+                            reservaCreada.setValue(reserva);
+                            errorMessage.setValue(null);
+                            plazaSeleccionada.setValue(null);
+                        }
+                        @Override
+                        public void onReservationFailed(String ms) {
+                            reservaCreada.postValue(null);
+                            errorMessage.setValue(ms);
+                        }
                     }
-                    @Override
-                    public void onReservationFailed(String ms) {
-                        reservaCreada.postValue(null);
-                        errorMessage.setValue(ms);
-                    }
-                });
+            );
     }
 
 
     public void editarReserva(String id, String oldSpot, Reserva oldReserva) {
-        if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || type.getValue() == null) {
+        if (date.getValue() == null || horaInicio.getValue() == null || horaFin.getValue() == null || plazaSeleccionada.getValue() == null) {
             errorMessage.setValue("Por favor, completa todos los campos antes de crear la reserva.");
             reservaCreada.setValue(null);
             return;
@@ -123,7 +132,7 @@ public class CrearViewModel extends ViewModel {
         String inicioIso = DateUtil.toUtcIsoString(date.getValue(), horaInicioStr);
         String finIso = DateUtil.toUtcIsoString(date.getValue(), horaFinStr);
 
-        dataRepository.editReservation(id, formattedDate, finIso, "defaultParking", type.getValue(), inicioIso, oldSpot
+        dataRepository.editReservation(id, formattedDate, finIso, "defaultParking", plazaSeleccionada.getValue(), inicioIso, oldSpot
                 , dateFormat.format(oldReserva.getFecha()), oldReserva.getHoraInicio(), oldReserva.getHoraFin(), new DataRepository.OnReservationCompleteListener() {
             @Override
             public void onReservationSuccess(String parkingId, String spotId, String reservationId) {
@@ -139,7 +148,7 @@ public class CrearViewModel extends ViewModel {
                         date.getValue(),  // Los valores del ViewModel (actualizados)
                         inicioIso,
                         finIso,
-                        new Plaza(spotId, type.getValue()),
+                        plazaSeleccionada.getValue(),
                         FirebaseAuth.getInstance().getUid(),
                         EstadoReserva.Reservado,
                         id,  // Mantiene el mismo ID

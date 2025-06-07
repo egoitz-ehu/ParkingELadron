@@ -27,6 +27,7 @@
     <string name="crear_selectHoraEntrada">Selecciona hora de entrada</string>
     <string name="crear_selectHoraSalida">Selecciona hora de salida</string>
     <string name="crear_reserrva">Crear reserva</string>
+    <string name="crear_select_plaza">Seleccionar plaza:</string>
 
     <string name="op_normal">Normal</string>
     <string name="op_electrico">Electrico</string>
