@@ -52,10 +52,8 @@ public class CrearFragment extends Fragment {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Plaza plaza = (Plaza) result.getData().getSerializableExtra(SelectParkingSpotActivity.EXTRA_SELECTED_SPOT);
                     if (plaza != null) {
-                        // Aquí tienes la plaza seleccionada, puedes guardar el id o actualizar el ViewModel
                         Toast.makeText(getContext(), "Plaza seleccionada: " + plaza.getId(), Toast.LENGTH_SHORT).show();
-                        // Por ejemplo:
-                        // viewModel.setPlazaSeleccionada(plaza);
+                        viewModel.setPlazaSeleccionada(plaza);
                     }
                 }
             });
@@ -78,7 +76,6 @@ public class CrearFragment extends Fragment {
             viewModel.setDate(reserva.getFecha());
             viewModel.setHoraInicio(DateUtil.isoToLocalHour(reserva.getHoraInicio()));
             viewModel.setHoraFin(DateUtil.isoToLocalHour(reserva.getHoraFin()));
-            viewModel.setType(reserva.getPlaza().getType());
             binding.btnCrear.setText(R.string.editart_btn);
         } else {
             reserva = null;
@@ -180,32 +177,6 @@ public class CrearFragment extends Fragment {
                 getString(R.string.op_moto)
         };
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), R.layout.spinner_selected_item, opciones);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinner.setAdapter(adapter);
-        binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                int pos = adapterView.getSelectedItemPosition();
-                switch (pos) {
-                    case 0:
-                        viewModel.setType(TiposPlaza.NORMAL);
-                        break;
-                    case 1:
-                        viewModel.setType(TiposPlaza.ELECTRICO);
-                        break;
-                    case 2:
-                        viewModel.setType(TiposPlaza.ACCESIBLE);
-                        break;
-                    case 3:
-                        viewModel.setType(TiposPlaza.MOTO);
-                        break;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
 
         // Configura el botón para crear la reserva
         binding.btnCrear.setOnClickListener(v -> {
@@ -253,6 +224,7 @@ public class CrearFragment extends Fragment {
 
                 intent.putExtra(SelectParkingSpotActivity.EXTRA_START_TIME, viewModel.getHoraInicio().getValue());
                 intent.putExtra(SelectParkingSpotActivity.EXTRA_END_TIME, viewModel.getHoraFin().getValue());
+                intent.putExtra("reservation_id", reserva != null ? reserva.getId() : null);
                 selectSpotLauncher.launch(intent);
             }
         });
@@ -268,6 +240,14 @@ public class CrearFragment extends Fragment {
                 eliminarNotificaciones(id);
             }
         });
+
+        viewModel.getPlazaSeleccionada().observe(requireActivity(), plaza -> {
+            if(plaza != null) {
+                binding.btnSeleccionar.setText(plaza.getId());
+            } else {
+                binding.btnSeleccionar.setText(getString(R.string.crear_select_plaza));
+            }
+        });
     }
 
     // Restablece los campos del formulario y el ViewModel
@@ -275,7 +255,7 @@ public class CrearFragment extends Fragment {
         viewModel.setDate(null);
         viewModel.setHoraInicio(null);
         viewModel.setHoraFin(null);
-        binding.spinner.setSelection(0);
+        viewModel.setPlazaSeleccionada(null);
     }
 
     private void scheduleNotificationForReserva(Reserva reserva) {

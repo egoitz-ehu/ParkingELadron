@@ -55,9 +55,10 @@ public class SelectParkingSpotActivity extends AppCompatActivity implements Park
         String selectedDate = intent.getStringExtra(EXTRA_SELECTED_DATE);
         String startTime = intent.getStringExtra(EXTRA_START_TIME);
         String endTime = intent.getStringExtra(EXTRA_END_TIME);
+        String reservationId = intent.getStringExtra("reservation_id");
 
         if (parkingId != null && selectedDate != null && startTime != null && endTime != null) {
-            viewModel.loadParkingSpotsForParking(parkingId, selectedDate, startTime, endTime);
+            viewModel.loadParkingSpotsForParking(parkingId, selectedDate, startTime, endTime, reservationId);
         } else {
             Toast.makeText(this, "Error: Faltan datos necesarios", Toast.LENGTH_SHORT).show();
             finish();

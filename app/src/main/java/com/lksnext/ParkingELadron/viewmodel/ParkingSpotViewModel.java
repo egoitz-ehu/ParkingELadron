@@ -9,6 +9,8 @@ import com.lksnext.ParkingELadron.domain.Plaza;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public class ParkingSpotViewModel extends ViewModel {
 
     private MutableLiveData<List<Plaza>> parkingSpots = new MutableLiveData<>();
@@ -43,7 +45,7 @@ public class ParkingSpotViewModel extends ViewModel {
         return selectedSpot;
     }
 
-    public void loadParkingSpotsForParking(String parkingId, String selectedDate, String startTime, String endTime) {
+    public void loadParkingSpotsForParking(String parkingId, String selectedDate, String startTime, String endTime, @Nullable String reservationId) {
         isLoading.setValue(true);
 
         // Remover cualquier observer anterior para evitar duplicados
@@ -59,7 +61,7 @@ public class ParkingSpotViewModel extends ViewModel {
 
         // Registrar el observer y llamar al método
         repository.getPlazasLiveData().observeForever(plazasObserver);
-        repository.getParkingSpots(parkingId, selectedDate, startTime, endTime);
+        repository.getParkingSpots(parkingId, selectedDate, startTime, endTime,reservationId);
     }
 
     public void selectParkingSpot(Plaza plaza) {

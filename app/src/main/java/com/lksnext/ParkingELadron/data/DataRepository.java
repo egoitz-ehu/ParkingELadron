@@ -398,13 +398,13 @@ public class DataRepository {
         void onReservationRemoveFailed(String msg);
     }
 
-    public void editReservation(String oldId, String day, String endTime, String parkingId, TiposPlaza type, String startTime, String spotId,
+    public void editReservation(String oldId, String day, String endTime, String parkingId, Plaza newPlaza, String startTime, String oldSpotId,
                                 String oldDay, String oldStartTime, String oldEndTime, OnReservationCompleteListener listener) {
         AtomicBoolean reservationCreated = new AtomicBoolean(false);
         firestore.collection("parking")
                 .document(parkingId)
                 .collection("parkingSpots")
-                .whereEqualTo("type", type.toString())
+                .whereEqualTo("id", newPlaza.getId())
                 .get()
                 .addOnSuccessListener(spotsQuerySnapshot -> {
                     if (!spotsQuerySnapshot.isEmpty()) {
@@ -416,18 +416,29 @@ public class DataRepository {
 
                             if (isSpotAvailable(reservations, startTime, endTime, oldId)) {
                                 reservationCreated.set(true);
-                                updateReservation(oldId, parkingId,spotId, day, startTime, endTime, type, spotDoc.getId(), listener, oldDay, oldStartTime, oldEndTime);
-                                return; // No seguir buscando en este parking
+                                updateReservation(
+                                        oldId,
+                                        parkingId,
+                                        oldSpotId,
+                                        day,
+                                        startTime,
+                                        endTime,
+                                        newPlaza.getType(),
+                                        newPlaza.getId(),
+                                        listener,
+                                        oldDay,
+                                        oldStartTime,
+                                        oldEndTime
+                                );
+                                return;
                             }
                         }
                     }
-                    // Si ya hemos terminado este parking, decrementamos el contador
                     if (!reservationCreated.get()) {
                         listener.onReservationFailed("No hay plazas disponibles para hacer el cambio.");
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // También decrementa y chequea el contador en caso de error
                     listener.onReservationFailed("Error al buscar plazas: " + e.getMessage());
                 });
     }
@@ -458,6 +469,24 @@ public class DataRepository {
                             listener.onReservationFailed("Error al eliminar la reserva de la plaza anterior.");
                         }
                     });
+                    List<Reserva> reservas = reservationsLiveData.getValue();
+                    if (reservas != null) {
+                        for (Reserva r : reservas) {
+                            try {
+                                if (r.getId().equals(oldId)) {
+                                    r.setFecha(new SimpleDateFormat("yyyy-MM-dd").parse(newDay));
+                                    r.setHoraInicio(newStartTime);
+                                    r.setHoraFin(newEndTime);
+                                    r.setPlaza(new Plaza(newSpotId, newType));
+                                    // Si tienes más campos a actualizar, hazlo aquí
+                                    break;
+                                }
+                            } catch (ParseException e1) {
+                                System.out.println("Problema al parsear fecha en updateReservation");
+                            }
+                        }
+                        reservationsLiveData.setValue(reservas);
+                    }
                 });
     }
 
@@ -501,66 +530,55 @@ public class DataRepository {
         return plazasLiveData;
     }
 
-    public void getParkingSpots(String parkingId, String myDay, String myStart, String myEnd){
-        // Normalizar el formato de fecha de entrada
+    private boolean hayConflictoHorarioIso(String existingStartIso, String existingEndIso, String newStartIso, String newEndIso) {
+        return DateUtil.timeOverlapsIso(existingStartIso, existingEndIso, newStartIso, newEndIso);
+    }
+
+    public void getParkingSpots(String parkingId, String myDay, String myStart, String myEnd, @Nullable String reservationIdToIgnore) {
         String normalizedDay = normalizeDateFormat(myDay);
-        Log.d("ParkingRepo", "Buscando plazas para: parking=" + parkingId +
-                ", día original=" + myDay + ", día normalizado=" + normalizedDay +
-                ", hora=" + myStart + "-" + myEnd);
+        try {
+            String myStartIso = DateUtil.toUtcIsoString(new SimpleDateFormat("yyyy-MM-dd").parse(normalizedDay), myStart);
+            String myEndIso = DateUtil.toUtcIsoString(new SimpleDateFormat("yyyy-MM-dd").parse(normalizedDay), myEnd);
 
-        firestore.collection("parking")
-                .document(parkingId)
-                .collection("parkingSpots")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        List<Plaza> plazas = new ArrayList<>();
-                        List<DocumentSnapshot> documents = querySnapshot.getDocuments();
-
-                        for (DocumentSnapshot doc : documents) {
-                            String id = doc.getString("id");
-                            TiposPlaza type = TiposPlaza.valueOf(doc.getString("type"));
-                            boolean disponible = true; // Por defecto asumimos que está disponible
-
-                            List<Map<String, Object>> reservations = (List<Map<String, Object>>) doc.get("reservations");
-                            if (reservations != null) {
-                                for(Map<String, Object> reserva: reservations) {
-                                    String day = (String) reserva.get("day");
-                                    // Normalizar el formato de fecha de la reserva
-                                    String normalizedReservationDay = normalizeDateFormat(day);
-
-                                    String startTime = (String) reserva.get("startTime");
-                                    String endTime = (String) reserva.get("endTime");
-
-                                    Log.d("ParkingRepo", "Reserva: día original=" + day +
-                                            ", día normalizado=" + normalizedReservationDay +
-                                            ", hora=" + startTime + "-" + endTime);
-
-                                    // Comparar usando los formatos normalizados
-                                    if (normalizedReservationDay.equals(normalizedDay)) {
-                                        Log.d("ParkingRepo", "Mismo día, verificando conflicto horario");
-                                        boolean conflicto = hayConflictoHorario(startTime, endTime, myStart, myEnd);
-                                        if (conflicto) {
-                                            disponible = false; // La plaza no está disponible
-                                            Log.d("ParkingRepo", "Plaza " + id + " NO disponible por conflicto");
-                                            break; // Salimos del bucle, ya sabemos que no está disponible
+            firestore.collection("parking")
+                    .document(parkingId)
+                    .collection("parkingSpots")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            List<Plaza> plazas = new ArrayList<>();
+                            for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                                String id = doc.getString("id");
+                                TiposPlaza type = TiposPlaza.valueOf(doc.getString("type"));
+                                boolean disponible = true;
+                                List<Map<String, Object>> reservations = (List<Map<String, Object>>) doc.get("reservations");
+                                if (reservations != null) {
+                                    for (Map<String, Object> reserva : reservations) {
+                                        String reservationId = (String) reserva.get("reservationId");
+                                        if (reservationIdToIgnore != null && reservationIdToIgnore.equals(reservationId)) {
+                                            continue;
+                                        }
+                                        String day = (String) reserva.get("day");
+                                        String normalizedReservationDay = normalizeDateFormat(day);
+                                        String startTimeIso = (String) reserva.get("startTime");
+                                        String endTimeIso = (String) reserva.get("endTime");
+                                        if (normalizedReservationDay.equals(normalizedDay)) {
+                                            if (hayConflictoHorarioIso(startTimeIso, endTimeIso, myStartIso, myEndIso)) {
+                                                disponible = false;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
-                            } else {
-                                Log.d("ParkingRepo", "Plaza " + id + " no tiene reservas");
+                                plazas.add(new Plaza(id, type, disponible));
                             }
-
-                            Plaza p = new Plaza(id, type, disponible);
-                            plazas.add(p);
-                            Log.d("ParkingRepo", "Plaza " + id + " disponible: " + disponible);
+                            plazasLiveData.setValue(plazas);
                         }
-                        plazasLiveData.setValue(plazas);
-                    } else {
-                        Log.e("ParkingRepo", "Error al obtener plazas: " + task.getException().getMessage());
-                    }
-                });
+                    });
+        } catch(ParseException e) {
+            Log.e("ParkingRepo", "Error al parsear la fecha: " + myDay, e);
+            plazasLiveData.setValue(new ArrayList<>());
+        }
     }
 
     /**
