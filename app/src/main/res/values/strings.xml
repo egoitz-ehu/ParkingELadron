@@ -11,7 +11,7 @@
     <string name="login_password">Ingresa la contraseña</string>
     <string name="login_enter">Entrar en la cuenta</string>
     <string name="login_another">Otra forma</string>
-    <string name="login_forget">¿Olvidaste tu contraseña</string>
+    <string name="login_forget">¿Olvidaste tu contraseña?</string>
     <string name="login_create">¿No tienes cuenta? Crea una</string>
 
     <string name="register_title">Registrarse</string>
