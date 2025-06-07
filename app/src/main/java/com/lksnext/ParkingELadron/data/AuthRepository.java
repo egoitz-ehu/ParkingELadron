@@ -20,6 +20,7 @@ public class AuthRepository {
 
     private MutableLiveData<FirebaseUser> userLiveData = new MutableLiveData<>();
     private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
+    private MutableLiveData<String> successLiveData = new MutableLiveData<>();
 
     public void registerUserWithEmail(String email, String password, String name, String surname) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
@@ -66,11 +67,26 @@ public class AuthRepository {
         this.userLiveData.setValue(firebaseAuth.getCurrentUser());
     }
 
+    public void sendPasswordResetEmail(String email) {
+        firebaseAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        successLiveData.postValue("Correo de restablecimiento enviado");
+                    } else {
+                        errorLiveData.postValue(task.getException().getMessage());
+                    }
+                });
+    }
+
     public LiveData<FirebaseUser> getUserLiveData(){
         return userLiveData;
     }
 
     public LiveData<String> getErrorLiveData(){
         return errorLiveData;
+    }
+
+    public LiveData<String> getSuccessLiveData() {
+        return successLiveData;
     }
 }
