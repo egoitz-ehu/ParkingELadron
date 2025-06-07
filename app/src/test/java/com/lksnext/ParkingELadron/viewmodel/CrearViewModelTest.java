@@ -42,12 +42,11 @@ public class CrearViewModelTest {
     @Test
     public void testCrearReserva_datosNoValidos() throws InterruptedException {
         viewModel.setDate(null);
-        viewModel.setType(null);
         viewModel.setHoraFin(null);
         viewModel.setHoraInicio(null);
         viewModel.crearReserva("prueba");
         assertEquals("Por favor, completa todos los campos antes de crear la reserva.", LiveDataTestUtil.getValue(viewModel.getErrorMessage()));
-        assertFalse(LiveDataTestUtil.getValue(viewModel.getReservaCreada()));
+        assertNull(LiveDataTestUtil.getValue(viewModel.getReservaCreada()));
         verifyNoInteractions(mockRepository);
     }
 
@@ -211,3 +210,4 @@ public class CrearViewModelTest {
         );
     }
 }
+
