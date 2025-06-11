@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:180327290758:android:0b96cbc45465c4f56e3e07",
+        "mobilesdk_app_id": "1:180327290758:android:ce536db30cf237c26e3e07",
         "android_client_info": {
           "package_name": "com.lksnext.ParkingELadron"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAvUcqsiwbQbXBAT1OMsrRK6hMBD0dlN64"
+          "current_key": "AIzaSyDRTc308trL0de73BnytmDnbHT9f1mjKXI"
         }
       ],
       "services": {

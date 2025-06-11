@@ -91,7 +91,7 @@ public class CrearViewModel extends ViewModel {
                                     inicioIso,
                                     finIso,
                                     plazaSeleccionada.getValue(),
-                                    FirebaseAuth.getInstance().getUid(),
+                                    userId,
                                     EstadoReserva.Reservado,
                                     reservationId,
                                     parkingId
@@ -149,7 +149,7 @@ public class CrearViewModel extends ViewModel {
                         inicioIso,
                         finIso,
                         plazaSeleccionada.getValue(),
-                        FirebaseAuth.getInstance().getUid(),
+                        oldReserva.getUsuarioId(),
                         EstadoReserva.Reservado,
                         id,  // Mantiene el mismo ID
                         parkingId
@@ -174,3 +174,5 @@ public class CrearViewModel extends ViewModel {
         dataRepository.storeWorkerId(workerId, reservaId, type);
     }
 }
+
+
