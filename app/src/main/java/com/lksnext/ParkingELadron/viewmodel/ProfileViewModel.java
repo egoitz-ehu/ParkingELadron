@@ -31,6 +31,4 @@ public class ProfileViewModel extends ViewModel {
     public void logout() {
         authRepository.signOut();
     }
-
-
 }

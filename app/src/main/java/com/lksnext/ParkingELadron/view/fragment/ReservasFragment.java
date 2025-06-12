@@ -13,10 +13,13 @@ import androidx.work.WorkManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.FragmentReservasBinding;
+import com.lksnext.ParkingELadron.domain.EstadoReserva;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.view.adapters.ReservaAdapter;
 import com.lksnext.ParkingELadron.view.dialog.ReservaDialog;
@@ -55,7 +58,7 @@ public class ReservasFragment extends Fragment {
         });
 
         // Observa el LiveData del ViewModel
-        viewModel.getReservas().observe(getViewLifecycleOwner(), reservas -> {
+        viewModel.getReservasFiltradas().observe(getViewLifecycleOwner(), reservas -> {
             System.out.println("Datos conseguidos");
             if(reservas != null) {
                 if(reservas.isEmpty()){
@@ -81,6 +84,54 @@ public class ReservasFragment extends Fragment {
 
         viewModel.getReservaEliminadaLiveData().observe(requireActivity(), reserva -> {
             if(reserva!=null) eliminarNotificaciones(reserva.getNotificationWorkerId1(), reserva.getNotificationWorkerId2());
+        });
+
+        String[] tipos = {
+                getString(R.string.reserva_todos),
+                getString(R.string.reserva_reservado),
+                getString(R.string.reserva_enMarcha),
+                getString(R.string.reserva_finalizado),
+        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, tipos);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerFiltro.setAdapter(adapter);
+
+
+        binding.spinnerFiltro.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                EstadoReserva estado;
+                switch (position) {
+                    case 1:
+                        estado = EstadoReserva.Reservado;
+                        break;
+                    case 2:
+                        estado = EstadoReserva.EN_MARCHA;
+                        break;
+                    case 3:
+                        estado = EstadoReserva.Finalizado;
+                        break;
+                    default:
+                        estado = null;
+                        break;
+                }
+                viewModel.setEstadoReserva(estado);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        binding.ivTipo.setOnClickListener(v -> binding.spinnerFiltro.performClick());
+
+        binding.btnOrden.setOnClickListener(v -> viewModel.toggleOrden());
+
+        viewModel.getOrdenAscendente().observe(getViewLifecycleOwner(), asc -> {
+            binding.btnOrden.setImageResource(asc ? R.drawable.asc_icon : R.drawable.desc_icon);
+            // Actualiza la lista aquí según el orden
+        });
+
+        viewModel.getEstadoReserva().observe(getViewLifecycleOwner(), tipo -> {
+            // Filtra la lista aquí según el tipo
         });
     }
 
