@@ -34,6 +34,8 @@ public class ReservaDialog extends Dialog {
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
         binding.tvDia.setText(format.format(reserva.getFecha()));
         binding.tvHoras.setText(reserva.getHoraInicio() + "-" + reserva.getHoraFin());
+        binding.tvParking.setText(reserva.getParkingId());
+        binding.tvSpot.setText(reserva.getPlaza().getId());
         binding.btnEdit.setOnClickListener(v->{
             listener.onEditReservation();
             dismiss();
