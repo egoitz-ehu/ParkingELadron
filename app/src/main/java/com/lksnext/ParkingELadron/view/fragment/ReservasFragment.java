@@ -96,7 +96,7 @@ public class ReservasFragment extends Fragment {
                 getString(R.string.reserva_enMarcha),
                 getString(R.string.reserva_finalizado),
         };
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, tipos);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item_white, tipos);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerFiltro.setAdapter(adapter);
 

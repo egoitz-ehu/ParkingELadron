@@ -315,6 +315,8 @@ public class CrearFragment extends Fragment {
 
         // Llama al repositorio o ViewModel para guardar el nuevo workId (ejemplo)
         viewModel.storeWorkerInRepository(workIdString, reservationId, workerIdType);
+
+        System.out.println("Worker programado: " + workIdString + " para reserva: " + reservationId);
     }
 
     private void eliminarNotificaciones(String id) {

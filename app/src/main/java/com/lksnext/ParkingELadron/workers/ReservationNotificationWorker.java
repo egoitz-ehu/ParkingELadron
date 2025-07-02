@@ -2,7 +2,9 @@ package com.lksnext.ParkingELadron.workers;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
@@ -32,7 +34,7 @@ public class ReservationNotificationWorker extends Worker {
         int notificationId = getInputData().getInt(KEY_NOTIFICATION_ID, (int) System.currentTimeMillis());
 
         if (title == null || message == null) {
-            Log.e("ReservationWorker", "Faltan datos para la notificación");
+            System.out.println("Faltan datos para la notificación");
             return Result.failure();
         }
 
@@ -50,17 +52,21 @@ public class ReservationNotificationWorker extends Worker {
             notificationManager.createNotificationChannel(channel);
         }
 
+        Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setSmallIcon(R.drawable.ic_parking_notification)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_parking_colored))
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ContextCompat.getColor(context, R.color.mainOrange));
 
         notificationManager.notify(notificationId, builder.build());
-        Log.d("ReservationWorker", "¡El Worker ha ejecutado la notificación!");
+        System.out.println("¡El Worker ha ejecutado la notificación!");
         return Result.success();
     }
 }

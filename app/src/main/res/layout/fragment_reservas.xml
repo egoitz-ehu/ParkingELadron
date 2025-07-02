@@ -44,7 +44,7 @@
                 app:layout_constraintEnd_toStartOf="@id/btnOrden"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0"/>
+                app:layout_constraintHorizontal_bias="0" />
 
             <ImageButton
                 android:id="@+id/btnOrden"
