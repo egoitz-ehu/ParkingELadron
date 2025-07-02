@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataRepository {
-    private static DataRepository instance;
+    private static DataRepository instance = null;
     private final FirebaseFirestore firestore;
 
     private MutableLiveData<List<Reserva>> reservationsLiveData;
@@ -44,7 +44,7 @@ public class DataRepository {
 
     private DataRepository(FirebaseFirestore firestore) {
         this.firestore = firestore;
-        reservationsLiveData = new MutableLiveData<>();
+        reservationsLiveData = new MutableLiveData<>(new ArrayList<>());
         plazasLiveData = new MutableLiveData<>();
     }
 

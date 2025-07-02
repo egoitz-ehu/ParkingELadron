@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 
 public class ParkingSpotViewModel extends ViewModel {
 
-    private MutableLiveData<List<Plaza>> parkingSpots = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private MutableLiveData<String> error = new MutableLiveData<>();
     private MutableLiveData<Plaza> selectedSpot = new MutableLiveData<>();
@@ -30,7 +29,7 @@ public class ParkingSpotViewModel extends ViewModel {
     }
 
     public LiveData<List<Plaza>> getParkingSpots() {
-        return parkingSpots;
+        return repository.getPlazasLiveData();
     }
 
     public LiveData<Boolean> getIsLoading() {
@@ -52,16 +51,8 @@ public class ParkingSpotViewModel extends ViewModel {
         if (plazasObserver != null) {
             repository.getPlazasLiveData().removeObserver(plazasObserver);
         }
-
-        // Crear un nuevo observer
-        plazasObserver = plazas -> {
-            parkingSpots.setValue(plazas);
-            isLoading.setValue(false);
-        };
-
-        // Registrar el observer y llamar al método
-        repository.getPlazasLiveData().observeForever(plazasObserver);
         repository.getParkingSpots(parkingId, selectedDate, startTime, endTime,reservationId);
+        isLoading.setValue(false);
     }
 
     public void selectParkingSpot(Plaza plaza) {
