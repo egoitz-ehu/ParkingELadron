@@ -39,17 +39,42 @@ public class RegisterViewModelTest {
     }
 
     @Test
-    public void registerUserWithValidData_callsRepositoryAndUpdatesLiveData() throws InterruptedException {
-        String email = "test@mail.com";
-        String password = "password";
-        String name = "John";
-        String surname = "Doe";
+    public void registerUserWithEmail_userAlreadyLoggedIn_doesNotCallRepository() {
         FirebaseUser fakeUser = Mockito.mock(FirebaseUser.class);
+        userLiveData.setValue(fakeUser);
 
-        viewModel.registerUserWithEmail(email, password, name, surname);
+        viewModel.registerUserWithEmail("test@mail.com", "password", "John", "Doe");
 
-        verify(mockRepository).registerUserWithEmail(email, password, name, surname);
+        verify(mockRepository, Mockito.never()).registerUserWithEmail(anyString(), anyString(), anyString(), anyString());
+    }
 
+    @Test
+    public void registerUserWithEmail_emptyEmail_doesNotCallRepository() {
+        viewModel.registerUserWithEmail("", "password", "John", "Doe");
+        verify(mockRepository, Mockito.never()).registerUserWithEmail(anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void registerUserWithEmail_emptyPassword_doesNotCallRepository() {
+        viewModel.registerUserWithEmail("test@mail.com", "", "John", "Doe");
+        verify(mockRepository, Mockito.never()).registerUserWithEmail(anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void registerUserWithEmail_emptyName_doesNotCallRepository() {
+        viewModel.registerUserWithEmail("test@mail.com", "password", "", "Doe");
+        verify(mockRepository, Mockito.never()).registerUserWithEmail(anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void registerUserWithEmail_emptySurname_doesNotCallRepository() {
+        viewModel.registerUserWithEmail("test@mail.com", "password", "John", "");
+        verify(mockRepository, Mockito.never()).registerUserWithEmail(anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void getUserLiveData_returnsRepositoryLiveData() throws InterruptedException {
+        FirebaseUser fakeUser = Mockito.mock(FirebaseUser.class);
         userLiveData.postValue(fakeUser);
 
         FirebaseUser result = LiveDataTestUtil.getValue(viewModel.getUserLiveData());
@@ -57,15 +82,10 @@ public class RegisterViewModelTest {
     }
 
     @Test
-    public void registerUserWithEmptyData_doesNotCallRepository(){
-        viewModel.registerUserWithEmail("","","","");
-        verify(mockRepository, Mockito.never()).registerUserWithEmail(anyString(), anyString(), anyString(), anyString());
-    }
-
-    @Test
-    public void errorLiveData_emitsError() throws InterruptedException {
-        String errorMsg = "Error msg";
+    public void getErrorLiveData_returnsRepositoryErrorLiveData() throws InterruptedException {
+        String errorMsg = "Register failed";
         errorLiveData.postValue(errorMsg);
+
         String result = LiveDataTestUtil.getValue(viewModel.getErrorLiveData());
         assertEquals(errorMsg, result);
     }

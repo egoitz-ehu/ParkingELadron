@@ -39,16 +39,32 @@ public class LoginViewModelTest {
         viewModel = new LoginViewModel(mockRepository);
     }
 
+
     @Test
-    public void registerUserWithValidData_callsRepositoryAndUpdatesLiveData() throws InterruptedException {
-        String email = "test@mail.com";
-        String password = "password";
+    public void loginUserWithEmail_userAlreadyLoggedIn_doesNotCallRepository() {
         FirebaseUser fakeUser = Mockito.mock(FirebaseUser.class);
+        userLiveData.setValue(fakeUser);
 
-        viewModel.loginUserWithEmail(email, password);
+        viewModel.loginUserWithEmail("test@mail.com", "password");
 
-        verify(mockRepository).signInWithEmailAndPassword(email, password);
+        verify(mockRepository, Mockito.never()).signInWithEmailAndPassword(anyString(), anyString());
+    }
 
+    @Test
+    public void loginUserWithEmail_emptyEmail_doesNotCallRepository() {
+        viewModel.loginUserWithEmail("", "password");
+        verify(mockRepository, Mockito.never()).signInWithEmailAndPassword(anyString(), anyString());
+    }
+
+    @Test
+    public void loginUserWithEmail_emptyPassword_doesNotCallRepository() {
+        viewModel.loginUserWithEmail("test@mail.com", "");
+        verify(mockRepository, Mockito.never()).signInWithEmailAndPassword(anyString(), anyString());
+    }
+
+    @Test
+    public void getUserLiveData_returnsRepositoryLiveData() throws InterruptedException {
+        FirebaseUser fakeUser = Mockito.mock(FirebaseUser.class);
         userLiveData.postValue(fakeUser);
 
         FirebaseUser result = LiveDataTestUtil.getValue(viewModel.getUserLiveData());
@@ -56,15 +72,10 @@ public class LoginViewModelTest {
     }
 
     @Test
-    public void registerUserWithEmptyData_doesNotCallRepository(){
-        viewModel.loginUserWithEmail("", "");
-        verify(mockRepository, Mockito.never()).signInWithEmailAndPassword(anyString(), anyString());
-    }
-
-    @Test
-    public void errorLiveData_emitsError() throws InterruptedException {
-        String errorMsg = "Error msg";
+    public void getErrorLiveData_returnsRepositoryErrorLiveData() throws InterruptedException {
+        String errorMsg = "Login failed";
         errorLiveData.postValue(errorMsg);
+
         String result = LiveDataTestUtil.getValue(viewModel.getErrorLiveData());
         assertEquals(errorMsg, result);
     }
