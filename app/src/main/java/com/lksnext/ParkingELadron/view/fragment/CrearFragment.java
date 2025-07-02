@@ -182,11 +182,13 @@ public class CrearFragment extends Fragment {
         binding.btnCrear.setOnClickListener(v -> {
             if(reserva == null) {
                 viewModel.crearReserva(FirebaseAuth.getInstance().getUid());
-                // Observa si la reserva fue creada con éxito
+
                 viewModel.getReservaCreada().observe(getViewLifecycleOwner(), reserva1 -> {
                     if(reserva1 != null) {
                         Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
-                        resetForm(); // Restablece los campos para permitir crear otra reserva
+                        // Programa notificaciones para la nueva reserva
+                        scheduleNotificationForReserva(reserva1);
+                        resetForm();
                     }
                 });
 
