@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.lksnext.ParkingELadron.databinding.ActivityLoginBinding;
 import com.lksnext.ParkingELadron.viewmodel.LoginViewModel;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     private ActivityLoginBinding binding;
 

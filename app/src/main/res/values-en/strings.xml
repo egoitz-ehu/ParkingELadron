@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">ParkingELadron</string>
+
+    <string name="welcome_title">EasyParking</string>
+    <string name="welcome_subtitle">Parking App</string>
+    <string name="welcome_createAccount">Create an account</string>
+    <string name="welcome_enter">Sign in</string>
+
+    <string name="login_title">Sign in</string>
+    <string name="login_email">Enter your email</string>
+    <string name="login_password">Enter your password</string>
+    <string name="login_enter">Sign in</string>
+    <string name="login_another">Another way</string>
+    <string name="login_forget">Forgot your password?</string>
+    <string name="login_create">Don\'t have an account? Create one</string>
+
+    <string name="register_title">Register</string>
+    <string name="register_name">Enter your name</string>
+    <string name="register_surname">Enter your surname</string>
+    <string name="register_email">Enter your email</string>
+    <string name="register_password">Enter your password</string>
+    <string name="register_create">Create an account</string>
+    <string name="register_already">Already have an account? Sign in</string>
+
+    <string name="title_crear">Book</string>
+    <string name="crear_selectDia">Select a day</string>
+    <string name="crear_selectHoraEntrada">Select entry time</string>
+    <string name="crear_selectHoraSalida">Select exit time</string>
+    <string name="crear_reserrva">Create reservation</string>
+    <string name="crear_select_plaza">Select parking spot:</string>
+
+    <string name="op_normal">Normal</string>
+    <string name="op_electrico">Electric</string>
+    <string name="op_minusvalido">Accessible</string>
+    <string name="op_moto">Motorbike</string>
+
+    <string name="var_see">View reservations</string>
+    <string name="var_create">Make reservation</string>
+    <string name="var_profile">Profile</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="perfil_title">Profile</string>
+    <string name="perfil_info">Information</string>
+    <string name="perfil_name">Name:</string>
+    <string name="perfil_surname">Surname:</string>
+    <string name="perfil_email">Email:</string>
+    <string name="perfil_change">Change password</string>
+
+    <string name="forgot_title">Recover account</string>
+    <string name="forgot_newPass">Enter new password</string>
+    <string name="forgot_newPassConfirm">Confirm new password</string>
+    <string name="forgot_change">Change password</string>
+
+    <string name="change_title">Change password</string>
+
+    <string name="reserva_empty">You have no reservations. Create one to get started.</string>
+
+    <string name="editart_btn">Save changes</string>
+    <string name="editar_preguntar">Do you want to edit the reservation?</string>
+    <string name="editar_si">Yes</string>
+    <string name="editar_no">No</string>
+    <string name="title_editado">Reservation edited</string>
+    <string name="reserva_editado">The reservation has been successfully edited</string>
+
+    <string name="dialog_reserva">Edit</string>
+    <string name="dialog_eliminar">Delete</string>
+
+    <string name="reserva_todos">All</string>
+    <string name="reserva_reservado">Reserved</string>
+    <string name="reserva_enMarcha">In progress</string>
+    <string name="reserva_finalizado">Finished</string>
+</resources>

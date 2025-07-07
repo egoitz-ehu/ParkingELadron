@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.lksnext.ParkingELadron.databinding.ActivityForgotPasswordBinding;
 import com.lksnext.ParkingELadron.viewmodel.ForgotPasswordViewModel;
 
-public class ForgotPasswordActivity extends AppCompatActivity {
+public class ForgotPasswordActivity extends BaseActivity {
 
     private ActivityForgotPasswordBinding binding;
     private ForgotPasswordViewModel viewModel;

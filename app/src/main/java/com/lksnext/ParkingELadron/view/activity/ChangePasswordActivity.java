@@ -11,7 +11,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.ActivityChangePasswordBinding;
 
-public class ChangePasswordActivity extends AppCompatActivity {
+public class ChangePasswordActivity extends BaseActivity {
 
     private ActivityChangePasswordBinding binding;
 

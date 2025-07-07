@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">ParkingELadron</string>
+
+    <string name="welcome_title">EasyParking</string>
+    <string name="welcome_subtitle">Parking App</string>
+    <string name="welcome_createAccount">Kontu bat sortu</string>
+    <string name="welcome_enter">Saioa hasi</string>
+
+    <string name="login_title">Saioa hasi</string>
+    <string name="login_email">Sartu zure emaila</string>
+    <string name="login_password">Sartu pasahitza</string>
+    <string name="login_enter">Saioa hasi</string>
+    <string name="login_another">Beste modu bat</string>
+    <string name="login_forget">Pasahitza ahaztu duzu?</string>
+    <string name="login_create">Ez duzu konturik? Sortu bat</string>
+
+    <string name="register_title">Erregistratu</string>
+    <string name="register_name">Sartu zure izena</string>
+    <string name="register_surname">Sartu zure abizena</string>
+    <string name="register_email">Sartu zure emaila</string>
+    <string name="register_password">Sartu zure pasahitza</string>
+    <string name="register_create">Kontu bat sortu</string>
+    <string name="register_already">Dagoeneko kontua duzu? Saioa hasi</string>
+
+    <string name="title_crear">Erreserbatu</string>
+    <string name="crear_selectDia">Aukeratu egun bat</string>
+    <string name="crear_selectHoraEntrada">Aukeratu sarrera ordua</string>
+    <string name="crear_selectHoraSalida">Aukeratu irteera ordua</string>
+    <string name="crear_reserrva">Erreserba sortu</string>
+    <string name="crear_select_plaza">Aparkaleku plaza aukeratu:</string>
+
+    <string name="op_normal">Arrunta</string>
+    <string name="op_electrico">Elektrikoa</string>
+    <string name="op_minusvalido">Irisgarria</string>
+    <string name="op_moto">Motoa</string>
+
+    <string name="var_see">Erreserbak ikusi</string>
+    <string name="var_create">Erreserba egin</string>
+    <string name="var_profile">Profila</string>
+    <string name="hello_blank_fragment">Kaixo, fragmentu hutsa</string>
+
+    <string name="perfil_title">Profila</string>
+    <string name="perfil_info">Informazioa</string>
+    <string name="perfil_name">Izena:</string>
+    <string name="perfil_surname">Abizena:</string>
+    <string name="perfil_email">Emaila:</string>
+    <string name="perfil_change">Pasahitza aldatu</string>
+
+    <string name="forgot_title">Kontua berreskuratu</string>
+    <string name="forgot_newPass">Sartu pasahitz berria</string>
+    <string name="forgot_newPassConfirm">Berretsi pasahitz berria</string>
+    <string name="forgot_change">Pasahitza aldatu</string>
+
+    <string name="change_title">Pasahitza aldatu</string>
+
+    <string name="reserva_empty">Ez duzu erreserbarik. Sortu bat hasteko.</string>
+
+    <string name="editart_btn">Aldaketak gorde</string>
+    <string name="editar_preguntar">Erreserba editatu nahi duzu?</string>
+    <string name="editar_si">Bai</string>
+    <string name="editar_no">Ez</string>
+    <string name="title_editado">Erreserba editatua</string>
+    <string name="reserva_editado">Erreserba ondo editatu da</string>
+
+    <string name="dialog_reserva">Editatu</string>
+    <string name="dialog_eliminar">Ezabatu</string>
+
+    <string name="reserva_todos">Guztiak</string>
+    <string name="reserva_reservado">Erreserbatua</string>
+    <string name="reserva_enMarcha">Martxan</string>
+    <string name="reserva_finalizado">Amaituta</string>
+</resources>

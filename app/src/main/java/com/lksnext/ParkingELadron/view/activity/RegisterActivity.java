@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.lksnext.ParkingELadron.databinding.ActivityRegisterBinding;
 import com.lksnext.ParkingELadron.viewmodel.RegisterViewModel;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends BaseActivity {
 
     private ActivityRegisterBinding binding;
 
