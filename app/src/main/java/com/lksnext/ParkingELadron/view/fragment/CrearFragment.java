@@ -52,7 +52,7 @@ public class CrearFragment extends Fragment {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Plaza plaza = (Plaza) result.getData().getSerializableExtra(SelectParkingSpotActivity.EXTRA_SELECTED_SPOT);
                     if (plaza != null) {
-                        Toast.makeText(getContext(), "Plaza seleccionada: " + plaza.getId(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.selected_spot) + plaza.getId(), Toast.LENGTH_SHORT).show();
                         viewModel.setPlazaSeleccionada(plaza);
                     }
                 }
@@ -133,7 +133,7 @@ public class CrearFragment extends Fragment {
                     if (diferenciaHoras < 9 || (diferenciaHoras == 9 && diferenciaMinutos <= 0)) {
                         viewModel.setHoraFin(String.format("%02d:%02d", i, i1));
                     } else {
-                        Toast.makeText(getContext(), "La reserva puede ser máximo de 9 horas", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.reserva_max_time), Toast.LENGTH_SHORT).show();
                     }
                 };
                 TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), listener, hora, minute, true);
@@ -185,7 +185,7 @@ public class CrearFragment extends Fragment {
 
                 viewModel.getReservaCreada().observe(getViewLifecycleOwner(), reserva1 -> {
                     if(reserva1 != null) {
-                        Toast.makeText(getContext(), "Reserva creada con éxito", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.reserva_creada), Toast.LENGTH_SHORT).show();
                         // Programa notificaciones para la nueva reserva
                         scheduleNotificationForReserva(reserva1);
                         resetForm();
@@ -204,7 +204,7 @@ public class CrearFragment extends Fragment {
                             viewModel.editarReserva(reserva.getId(), reserva.getPlaza().getId(), reserva);
                             viewModel.getReservaCreada().observe(getViewLifecycleOwner(), reserva1 -> {
                                 if(reserva1 != null) {
-                                    Toast.makeText(getContext(), "Reserva editada con éxito", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), getString(R.string.reserva_creada), Toast.LENGTH_SHORT).show();
                                     requireActivity().getSupportFragmentManager().popBackStack();
                                     scheduleNotificationForReserva(reserva1);
 
@@ -274,8 +274,8 @@ public class CrearFragment extends Fragment {
             long triggerAt30 = startMillis - (30 * 60 * 1000);
             if (triggerAt30 > now) {
                 scheduleNotification(
-                        "¡Tu reserva está cerca!",
-                        "Quedan 30 minutos para que comience tu reserva.",
+                        getString(R.string.worker_30_near),
+                        getString(R.string.worker_30_near_desc),
                         triggerAt30 - now,
                         reserva.getId(),
                         "notificationWorkerId1"
@@ -286,8 +286,8 @@ public class CrearFragment extends Fragment {
             long triggerAt15 = endMillis - (15 * 60 * 1000);
             if (triggerAt15 > now) {
                 scheduleNotification(
-                        "¡Tu reserva está por terminar!",
-                        "Quedan 15 minutos para que finalice tu reserva.",
+                        getString(R.string.worker_15_near),
+                        getString(R.string.worker_15_near_desc),
                         triggerAt15 - now,
                         reserva.getId(),
                         "notificationWorkerId2"

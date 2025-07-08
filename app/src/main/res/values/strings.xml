@@ -70,4 +70,27 @@
     <string name="reserva_reservado">Reservado</string>
     <string name="reserva_enMarcha">En marcha</string>
     <string name="reserva_finalizado">Finalizado</string>
+
+    <string name="spot_not_available">Esta plaza no está disponible en el horario seleccionado</string>
+    <string name="selected_spot">Plaza seleccionada: </string>
+    <string name="reserva_max_time">La reserva puede ser máximo de 9 horas</string>
+    <string name="reserva_creada">Reserva creada con éxito</string>
+    
+    <string name="worker_30_near">¡Tu reserva está cerca!</string>
+    <string name="worker_30_near_desc">Quedan 30 minutos para que comience tu reserva.</string>
+    <string name="worker_15_near">¡Tu reserva está por terminar!</string>
+    <string name="worker_15_near_desc">Quedan 15 minutos para que finalice tu reserva.</string>
+
+    <string name="select_parking_title">Selecciona una plaza de estacionamiento</string>
+    <string name="legend_normal">Normal</string>
+    <string name="legend_disabled">Minusválidos</string>
+    <string name="legend_electric">Eléctrico</string>
+    <string name="legend_motorcycle">Moto</string>
+    <string name="legend_available">Disponible</string>
+    <string name="legend_unavailable">No disponible</string>
+
+    <string name="crear_title_fecha">Fecha</string>
+    <string name="crear_title_entrada">Hora de entrada</string>
+    <string name="crear_title_salida">Hora de salida</string>
+    <string name="crear_title_plaza">Plaza de aparcamiento</string>
 </resources>

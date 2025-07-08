@@ -102,7 +102,7 @@ public class SelectParkingSpotActivity extends BaseActivity implements ParkingSp
         if (plaza.isAvailable()) {
             viewModel.selectParkingSpot(plaza);
         } else {
-            Toast.makeText(this, "Esta plaza no está disponible en el horario seleccionado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.spot_not_available), Toast.LENGTH_SHORT).show();
         }
     }
 }

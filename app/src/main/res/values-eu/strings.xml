@@ -69,4 +69,27 @@
     <string name="reserva_reservado">Erreserbatua</string>
     <string name="reserva_enMarcha">Martxan</string>
     <string name="reserva_finalizado">Amaituta</string>
+
+    <string name="spot_not_available">Leku hau ez dago eskuragarri hautatutako orduan</string>
+    <string name="selected_spot">Aukeratutako lekua: </string>
+    <string name="reserva_max_time">Erreserba gehienez 9 ordukoa izan daiteke</string>
+    <string name="reserva_creada">Erreserba behar bezala sortu da</string>
+
+    <string name="worker_30_near">Zure erreserba gertu dago!</string>
+    <string name="worker_30_near_desc">30 minutu falta dira erreserba hasteko.</string>
+    <string name="worker_15_near">Zure erreserba amaitzear dago!</string>
+    <string name="worker_15_near_desc">15 minutu falta dira erreserba amaitzeko.</string>
+
+    <string name="select_parking_title">Aparkaleku plaza bat aukeratu</string>
+    <string name="legend_normal">Arrunta</string>
+    <string name="legend_disabled">Irisgarria</string>
+    <string name="legend_electric">Elektrikoa</string>
+    <string name="legend_motorcycle">Motoa</string>
+    <string name="legend_available">Libre</string>
+    <string name="legend_unavailable">Ez dago libre</string>
+
+    <string name="crear_title_fecha">Data</string>
+    <string name="crear_title_entrada">Sarrera ordua</string>
+    <string name="crear_title_salida">Irteera ordua</string>
+    <string name="crear_title_plaza">Aparkalekua</string>
 </resources>

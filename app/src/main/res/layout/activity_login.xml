@@ -86,49 +86,17 @@
         android:layout_height="1dp"
         app:layout_constraintTop_toBottomOf="@+id/btnEnter"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/tvAnother"
-        app:dividerColor="@color/white"
-        android:layout_marginTop="32dp"/>
-
-    <TextView
-        android:id="@+id/tvAnother"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:text="@string/login_another"
-        android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@+id/btnEnter"
-        app:layout_constraintStart_toEndOf="@+id/dividerLeft"
-        app:layout_constraintEnd_toStartOf="@+id/dividerRight"
-        android:textAlignment="center"
-        android:gravity="center"/>
-
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/dividerRight"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        app:layout_constraintTop_toBottomOf="@+id/btnEnter"
-        app:layout_constraintStart_toEndOf="@+id/tvAnother"
         app:layout_constraintEnd_toEndOf="parent"
         app:dividerColor="@color/white"
         android:layout_marginTop="32dp"/>
 
-    <ImageButton
-        android:id="@+id/google_btn"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        app:layout_constraintTop_toBottomOf="@id/tvAnother"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:src="@drawable/google_logo"
-        android:background="@null"
-        android:scaleType="fitCenter"/>
 
     <TextView
         android:id="@+id/tvForget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/login_forget"
-        app:layout_constraintTop_toBottomOf="@id/google_btn"
+        app:layout_constraintTop_toBottomOf="@id/dividerLeft"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:textColor="@color/white"

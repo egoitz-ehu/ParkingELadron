@@ -69,4 +69,27 @@
     <string name="reserva_reservado">Reserved</string>
     <string name="reserva_enMarcha">In progress</string>
     <string name="reserva_finalizado">Finished</string>
+
+    <string name="spot_not_available">This spot is not available at the selected time</string>
+    <string name="selected_spot">Selected spot: </string>
+    <string name="reserva_max_time">The reservation can be a maximum of 9 hours</string>
+    <string name="reserva_creada">Reservation created successfully</string>
+
+    <string name="worker_30_near">Your reservation is near!</string>
+    <string name="worker_30_near_desc">There are 30 minutes left until your reservation begins.</string>
+    <string name="worker_15_near">Your reservation is about to end!</string>
+    <string name="worker_15_near_desc">There are 15 minutes left until your reservation ends.</string>
+
+    <string name="select_parking_title">Select a parking spot</string>
+    <string name="legend_normal">Normal</string>
+    <string name="legend_disabled">Disabled</string>
+    <string name="legend_electric">Electric</string>
+    <string name="legend_motorcycle">Motorcycle</string>
+    <string name="legend_available">Available</string>
+    <string name="legend_unavailable">Unavailable</string>
+
+    <string name="crear_title_fecha">Date</string>
+    <string name="crear_title_entrada">Entry time</string>
+    <string name="crear_title_salida">Exit time</string>
+    <string name="crear_title_plaza">Parking spot</string>
 </resources>
