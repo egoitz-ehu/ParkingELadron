@@ -42,5 +42,10 @@ public class RegisterActivity extends BaseActivity {
         viewModel.getErrorLiveData().observe(this, error -> {
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
         });
+
+        binding.tvAlready.setOnClickListener(v -> {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        });
     }
 }
