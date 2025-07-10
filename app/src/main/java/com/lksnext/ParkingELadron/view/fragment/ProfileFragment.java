@@ -3,6 +3,7 @@ package com.lksnext.ParkingELadron.view.fragment;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -91,6 +92,17 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
+        });
+
+        binding.btnChange.setOnClickListener(v -> {
+            String email = viewModel.getUserLiveData().getValue() != null ? viewModel.getUserLiveData().getValue().getEmail() : "";
+            viewModel.changePassword(email);
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.perfil_change_password)
+                    .setMessage(R.string.perfil_change_password_message)
+                    .setPositiveButton(R.string.ok, null)
+                    .create();
+            dialog.show();
         });
     }
 }

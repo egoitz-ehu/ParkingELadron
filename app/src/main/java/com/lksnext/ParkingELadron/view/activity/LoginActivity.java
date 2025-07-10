@@ -40,5 +40,10 @@ public class LoginActivity extends BaseActivity {
             Intent intent = new Intent(this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
+
+        binding.tvCreate.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RegisterActivity.class);
+            startActivity(intent);
+        });
     }
 }

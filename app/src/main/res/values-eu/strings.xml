@@ -92,4 +92,8 @@
     <string name="crear_title_entrada">Sarrera ordua</string>
     <string name="crear_title_salida">Irteera ordua</string>
     <string name="crear_title_plaza">Aparkalekua</string>
+
+    <string name="perfil_change_password">Pasahitza aldatu</string>
+    <string name="perfil_change_password_message">Mezu bat bidali da zure pasahitza aldatzeko helbide elektronikora</string>
+    <string name="ok">Onartu</string>
 </resources>
