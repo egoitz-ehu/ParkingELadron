@@ -104,5 +104,16 @@ public class ProfileFragment extends Fragment {
                     .create();
             dialog.show();
         });
+
+        binding.btnChange.setOnClickListener(v -> {
+            String email = viewModel.getUserLiveData().getValue() != null ? viewModel.getUserLiveData().getValue().getEmail() : "";
+            viewModel.changePassword(email);
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.perfil_change_password)
+                    .setMessage(R.string.perfil_change_password_message)
+                    .setPositiveButton(R.string.ok, null)
+                    .create();
+            dialog.show();
+        });
     }
 }
