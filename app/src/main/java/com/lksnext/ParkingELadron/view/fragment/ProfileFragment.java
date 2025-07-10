@@ -54,9 +54,9 @@ public class ProfileFragment extends Fragment {
                 startActivity(intent);
                 requireActivity().finish();
             } else {
-                binding.tvName.setText(getString(R.string.perfil_name)+user.getDisplayName().split(" ")[0]);
-                binding.tvSurname.setText(getString(R.string.perfil_surname)+user.getDisplayName().split(" ")[1]);
-                binding.tvEmail.setText(getString(R.string.perfil_email)+user.getEmail());
+                binding.tvName.setText(user.getDisplayName().split(" ")[0]);
+                binding.tvSurname.setText(user.getDisplayName().split(" ")[1]);
+                binding.tvEmail.setText(user.getEmail());
             }
         });
 
