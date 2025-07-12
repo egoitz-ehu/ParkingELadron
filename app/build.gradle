@@ -25,6 +25,16 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                // Configurar Mockito para usar modo lenient
+                systemProperty 'mockito.mockmaker.strict', 'false'
+            }
+        }
+    }
+
     buildFeatures {
         dataBinding = true
         viewBinding true
@@ -94,3 +104,4 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
             'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec'
     ]))
 }
+

@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -370,27 +371,33 @@ public class DataRepository {
     }
 
     public void deleteReservation(Reserva reserva, OnReservationRemoveListener listener) {
-        firestore.collection("reservations").document(reserva.getId()).delete()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        System.out.println("Reserva eliminada correctamente");
-                        List<Reserva> currentList = reservationsLiveData.getValue();
-                        if (currentList != null) {
-                            List<Reserva> updatedList = new ArrayList<>(currentList);
-                            updatedList.removeIf(r -> r.getId().equals(reserva.getId()));
-                            reservationsLiveData.setValue(updatedList);
-                        }
-                        Map<String, Object> reservationEntry = new HashMap<>();
-                        reservationEntry.put("reservationId", reserva.getId());
-                        reservationEntry.put("endTime", reserva.getHoraFin());
-                        reservationEntry.put("day", new SimpleDateFormat("yyyy-MM-dd").format(reserva.getFecha()));
-                        reservationEntry.put("startTime", reserva.getHoraInicio());
-                        deleteSpotReservation(reserva.getParkingId(), reserva.getPlaza().getId(), reservationEntry, listener);
-                    }
-                })
-                .addOnFailureListener(aVoid -> {
-                    listener.onReservationRemoveFailed("Error al eliminar reserva");
-                });
+        Task<Void> deleteTask = firestore.collection("reservations").document(reserva.getId()).delete();
+
+        // Registrar el listener de completado por separado
+        deleteTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                System.out.println("Reserva eliminada correctamente");
+                List<Reserva> currentList = reservationsLiveData.getValue();
+                if (currentList != null) {
+                    List<Reserva> updatedList = new ArrayList<>(currentList);
+                    updatedList.removeIf(r -> r.getId().equals(reserva.getId()));
+                    reservationsLiveData.setValue(updatedList);
+                }
+                Map<String, Object> reservationEntry = new HashMap<>();
+                reservationEntry.put("reservationId", reserva.getId());
+                reservationEntry.put("endTime", reserva.getHoraFin());
+                reservationEntry.put("day", new SimpleDateFormat("yyyy-MM-dd").format(reserva.getFecha()));
+                reservationEntry.put("startTime", reserva.getHoraInicio());
+                deleteSpotReservation(reserva.getParkingId(), reserva.getPlaza().getId(), reservationEntry, listener);
+            } else {
+                listener.onReservationRemoveFailed("Error al eliminar reserva");
+            }
+        });
+
+        // Registrar el listener de fallo por separado
+        deleteTask.addOnFailureListener(e -> {
+            listener.onReservationRemoveFailed("Error al eliminar reserva: " + e.getMessage());
+        });
     }
 
     public interface OnReservationRemoveListener{
@@ -671,3 +678,4 @@ public class DataRepository {
         return horas * 60 + minutos;
     }
 }
+

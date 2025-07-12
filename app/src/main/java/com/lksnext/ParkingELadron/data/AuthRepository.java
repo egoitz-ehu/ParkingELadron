@@ -7,15 +7,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.lksnext.ParkingELadron.domain.ProfileBuilder;
+import com.lksnext.ParkingELadron.domain.RealProfileBuilder;
 
 public class AuthRepository {
     private FirebaseAuth firebaseAuth;
+    private ProfileBuilder profileBuilder;
 
-    public AuthRepository(FirebaseAuth auth) {
+    public AuthRepository(FirebaseAuth auth, ProfileBuilder profileBuilder) {
         this.firebaseAuth = auth;
+        this.profileBuilder = profileBuilder;
     }
     public AuthRepository() {
-        this(FirebaseAuth.getInstance());
+        this(FirebaseAuth.getInstance(), new RealProfileBuilder());
     }
 
     private MutableLiveData<FirebaseUser> userLiveData = new MutableLiveData<>();
@@ -27,19 +31,17 @@ public class AuthRepository {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
-                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                .setDisplayName(name + " " + surname) // Establecer el nombre completo
-                                .build();
-                        assert user != null;
-                        user.updateProfile(profileUpdates)
-                                .addOnCompleteListener(profileTask -> {
-                                    if (profileTask.isSuccessful()) {
-                                        userLiveData.postValue(user);
-                                    } else {
-                                        // Manejar errores al actualizar el perfil
-                                        errorLiveData.postValue(profileTask.getException().getMessage());
-                                    }
-                                });
+                        UserProfileChangeRequest profileUpdates = profileBuilder.buildProfile(name, surname);
+                        if (user != null) {
+                            user.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(profileTask -> {
+                                        if (profileTask.isSuccessful()) {
+                                            userLiveData.postValue(user);
+                                        } else {
+                                            errorLiveData.postValue(profileTask.getException().getMessage());
+                                        }
+                                    });
+                        }
                     } else {
                         errorLiveData.postValue(task.getException().getMessage());
                     }
