@@ -96,5 +96,8 @@
 
     <string name="perfil_change_password">Cambiar contraseña</string>
     <string name="perfil_change_password_message">Se ha enviado un mensaje al correo electronico para cambiar la contraseña</string>
+
     <string name="ok">Aceptar</string>
+
+    <string name="plaza">Plaza</string>
 </resources>

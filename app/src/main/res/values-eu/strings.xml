@@ -96,4 +96,6 @@
     <string name="perfil_change_password">Pasahitza aldatu</string>
     <string name="perfil_change_password_message">Mezu bat bidali da zure pasahitza aldatzeko helbide elektronikora</string>
     <string name="ok">Onartu</string>
+
+    <string name="plaza">Plaza</string>
 </resources>

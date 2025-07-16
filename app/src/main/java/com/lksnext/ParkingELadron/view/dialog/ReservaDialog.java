@@ -2,10 +2,15 @@ package com.lksnext.ParkingELadron.view.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.TimeUtils;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+
+import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.DialogReservaBinding;
 import com.lksnext.ParkingELadron.domain.DateUtil;
 import com.lksnext.ParkingELadron.domain.Reserva;
@@ -34,9 +39,20 @@ public class ReservaDialog extends Dialog {
         super.onCreate(savedInstanceState);
         binding = DialogReservaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        getWindow().setLayout(900, WindowManager.LayoutParams.WRAP_CONTENT);
+
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
         binding.tvDia.setText(format.format(reserva.getFecha()));
-        binding.tvHoras.setText(DateUtil.isoToLocalHour(reserva.getHoraInicio())+"-"+DateUtil.isoToLocalHour(reserva.getHoraFin()));
+        binding.tvHoras.setText(DateUtil.isoToLocalHour(reserva.getHoraInicio())+" - "+DateUtil.isoToLocalHour(reserva.getHoraFin()));
+
+        if(reserva!=null) {
+            binding.tvSpot.setText(getContext().getString(R.string.plaza));
+        }
+
+
         binding.btnEdit.setOnClickListener(v->{
             listener.onEditReservation();
             dismiss();

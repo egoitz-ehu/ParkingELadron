@@ -96,4 +96,6 @@
     <string name="perfil_change_password">Change password</string>
     <string name="perfil_change_password_message">A message has been sent to the email address to change your password</string>
     <string name="ok">Accept</string>
+
+    <string name="plaza">Spot</string>
 </resources>
