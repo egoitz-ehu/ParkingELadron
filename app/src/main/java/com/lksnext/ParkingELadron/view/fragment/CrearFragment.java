@@ -169,15 +169,6 @@ public class CrearFragment extends Fragment {
             }
         });
 
-        // Configura el spinner para seleccionar el tipo de plaza
-        String[] opciones = {
-                getString(R.string.op_normal),
-                getString(R.string.op_electrico),
-                getString(R.string.op_minusvalido),
-                getString(R.string.op_moto)
-        };
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), R.layout.spinner_selected_item, opciones);
-
         // Configura el botón para crear la reserva
         binding.btnCrear.setOnClickListener(v -> {
             if(reserva == null) {

@@ -72,26 +72,35 @@ public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.
         }
 
         public void bind(final Plaza plaza, final OnParkingSpotClickListener listener) {
-            tvSpotId.setText(plaza.getId());
             Log.d("ParkingViewHolder", "Mostrando plaza " + plaza.getId() + " disponible: " + plaza.isAvailable() +
                     " overlay: " + (unavailableOverlay != null ? "existe" : "no existe"));
+
+            String name = "";
 
             // Asignar el icono correspondiente según el tipo de plaza
             switch (plaza.getType()) {
                 case ACCESIBLE:
                     ivSpotType.setImageResource(R.drawable.ic_parking_disabled);
+                    name=itemView.getContext().getString(R.string.op_minusvalido);
                     break;
                 case ELECTRICO:
                     ivSpotType.setImageResource(R.drawable.ic_parking_electric);
+                    name=itemView.getContext().getString(R.string.op_electrico);
                     break;
                 case MOTO:
                     ivSpotType.setImageResource(R.drawable.ic_parking_motorcycle);
+                    name=itemView.getContext().getString(R.string.op_moto);
                     break;
                 case NORMAL:
                 default:
                     ivSpotType.setImageResource(R.drawable.ic_parking_normal);
+                    name=itemView.getContext().getString(R.string.op_normal);
                     break;
             }
+
+            name+=plaza.getId().charAt(plaza.getId().length()-1);
+
+            tvSpotId.setText(name);
 
             // Mostrar indicador de disponibilidad - asegúrate de que estás usando el método correcto
             // Puede ser isAvailable() o isDisponible() según hayas definido en tu clase Plaza

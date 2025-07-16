@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/mainDark"
     tools:context=".ui.parkingspot.SelectParkingSpotActivity">
 
     <TextView
@@ -16,7 +17,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:textColor="@color/white"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvParkingSpots"
@@ -50,7 +52,8 @@
             android:gravity="center_vertical"
             android:text="@string/legend_normal"
             android:drawableStart="@drawable/ic_parking_normal"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/white"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -59,7 +62,8 @@
             android:gravity="center_vertical"
             android:text="@string/legend_disabled"
             android:drawableStart="@drawable/ic_parking_disabled"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/white"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -68,7 +72,8 @@
             android:gravity="center_vertical"
             android:text="@string/legend_electric"
             android:drawableStart="@drawable/ic_parking_electric"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/white"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -76,7 +81,8 @@
             android:drawablePadding="4dp"
             android:gravity="center_vertical"
             android:text="@string/legend_motorcycle"
-            android:drawableStart="@drawable/ic_parking_motorcycle" />
+            android:drawableStart="@drawable/ic_parking_motorcycle"
+            android:textColor="@color/white"/>
     </LinearLayout>
 
     <LinearLayout
@@ -101,7 +107,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/legend_available"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/white"/>
 
         <View
             android:layout_width="20dp"
@@ -112,7 +119,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/legend_unavailable" />
+            android:text="@string/legend_unavailable"
+            android:textColor="@color/white"/>
 
     </LinearLayout>
 
