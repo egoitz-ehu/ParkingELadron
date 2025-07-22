@@ -44,6 +44,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
+    // Configuración para evitar conflictos de dependencias
+    configurations {
+        all*.exclude group: 'com.google.protobuf', module: 'protobuf-lite'
+    }
 }
 
 jacoco {
@@ -68,6 +73,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation libs.work.runtime
+    implementation libs.espresso.intents
+    implementation libs.fragment.testing
+    implementation libs.espresso.contrib
 
     // Unit Testing libraries
     testImplementation 'junit:junit:4.+'
@@ -79,7 +87,10 @@ dependencies {
     // Android Instrumentation Testing libraries
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'org.mockito:mockito-android:4.11.0'
     androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation 'androidx.appcompat:appcompat:1.6.1'
 }
 
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
@@ -102,6 +113,22 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
     executionData.setFrom(fileTree(dir: buildDir, includes: [
             'jacoco/testDebugUnitTest.exec',
             'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec'
+    ]))
+}
+
+task jacocoTestReportInstrumented(type: JacocoReport, dependsOn: ['connectedDebugAndroidTest']) {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*']
+    def debugTree = fileTree(dir: "$buildDir/intermediates/javac/debug", excludes: fileFilter)
+    def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+
+    sourceDirectories.setFrom(files(['src/main/java', 'src/main/kotlin']))
+    classDirectories.setFrom(files([debugTree, kotlinDebugTree]))
+    executionData.setFrom(fileTree(dir: buildDir, includes: [
+            'outputs/code_coverage/connected/*coverage.ec'
     ]))
 }
 

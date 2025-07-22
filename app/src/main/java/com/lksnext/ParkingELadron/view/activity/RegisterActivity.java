@@ -48,4 +48,8 @@ public class RegisterActivity extends BaseActivity {
             startActivity(intent);
         });
     }
+
+    public void setViewModel(RegisterViewModel viewModel) {
+        this.viewModel = viewModel;
+    }
 }

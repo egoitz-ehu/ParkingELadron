@@ -47,12 +47,31 @@ public class CrearFragment extends Fragment {
     private FragmentCrearBinding binding;
     private CrearViewModel viewModel;
 
+    // Getter para ViewModel (para pruebas)
+    public CrearViewModel getViewModel() {
+        return viewModel;
+    }
+
     private final ActivityResultLauncher<Intent> selectSpotLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Plaza plaza = (Plaza) result.getData().getSerializableExtra(SelectParkingSpotActivity.EXTRA_SELECTED_SPOT);
                     if (plaza != null) {
-                        Toast.makeText(getContext(), getString(R.string.selected_spot) + plaza.getId(), Toast.LENGTH_SHORT).show();
+                        String s = "";
+                        switch(plaza.getType()) {
+                            case ACCESIBLE:
+                                s = getString(R.string.op_minusvalido);
+                                break;
+                            case MOTO:
+                                s = getString(R.string.op_moto);
+                                break;
+                            case ELECTRICO:
+                                s = getString(R.string.op_electrico);
+                                break;
+                            default:
+                                s = getString(R.string.op_normal);
+                        }
+                        Toast.makeText(getContext(), getString(R.string.selected_spot) + s, Toast.LENGTH_SHORT).show();
                         viewModel.setPlazaSeleccionada(plaza);
                     }
                 }
@@ -322,3 +341,4 @@ public class CrearFragment extends Fragment {
         }
     }
 }
+

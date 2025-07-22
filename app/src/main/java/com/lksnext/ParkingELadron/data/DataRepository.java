@@ -43,7 +43,7 @@ public class DataRepository {
     private MutableLiveData<List<Reserva>> reservationsLiveData;
     private MutableLiveData<List<Plaza>> plazasLiveData;
 
-    private DataRepository(FirebaseFirestore firestore) {
+    protected DataRepository(FirebaseFirestore firestore) {
         this.firestore = firestore;
         reservationsLiveData = new MutableLiveData<>(new ArrayList<>());
         plazasLiveData = new MutableLiveData<>();
@@ -150,59 +150,6 @@ public class DataRepository {
             Plaza plaza = new Plaza("accesible" + i, TiposPlaza.ACCESIBLE);
             batch.set(spotRef, plaza);
         }
-    }
-
-    public void findAndCreateReservation(String type, String day, String startTime, String endTime, String userId, OnReservationCompleteListener listener) {
-        firestore.collection("parking")
-                .get()
-                .addOnSuccessListener(parkingQuerySnapshot -> {
-                    if (parkingQuerySnapshot.isEmpty()) {
-                        listener.onReservationFailed("No se encontraron parkings.");
-                        return;
-                    }
-
-                    AtomicBoolean reservationCreated = new AtomicBoolean(false);
-                    AtomicInteger pendingParkings = new AtomicInteger(parkingQuerySnapshot.size());
-
-                    for (QueryDocumentSnapshot parkingDoc : parkingQuerySnapshot) {
-                        if (reservationCreated.get()) break;
-
-                        String parkingId = parkingDoc.getId();
-
-                        firestore.collection("parking")
-                                .document(parkingId)
-                                .collection("parkingSpots")
-                                .whereEqualTo("type", type)
-                                .get()
-                                .addOnSuccessListener(spotsQuerySnapshot -> {
-                                    if (!spotsQuerySnapshot.isEmpty()) {
-                                        for (QueryDocumentSnapshot spotDoc : spotsQuerySnapshot) {
-                                            if (reservationCreated.get()) break;
-
-                                            Map<String, Object> spot = spotDoc.getData();
-                                            List<Map<String, Object>> reservations = (List<Map<String, Object>>) spot.get("reservations");
-
-                                            if (isSpotAvailable(reservations, startTime, endTime, null)) {
-                                                reservationCreated.set(true);
-                                                createReservation(parkingId, spotDoc.getId(), day, startTime, endTime, userId, type, listener);
-                                                return; // No seguir buscando en este parking
-                                            }
-                                        }
-                                    }
-                                    // Si ya hemos terminado este parking, decrementamos el contador
-                                    if (pendingParkings.decrementAndGet() == 0 && !reservationCreated.get()) {
-                                        listener.onReservationFailed("No hay plazas disponibles.");
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    // También decrementa y chequea el contador en caso de error
-                                    if (pendingParkings.decrementAndGet() == 0 && !reservationCreated.get()) {
-                                        listener.onReservationFailed("Error al buscar plazas: " + e.getMessage());
-                                    }
-                                });
-                    }
-                })
-                .addOnFailureListener(e -> listener.onReservationFailed("Error al buscar parkings: " + e.getMessage()));
     }
 
     public void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, String type, OnReservationCompleteListener listener) {
