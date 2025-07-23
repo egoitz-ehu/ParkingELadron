@@ -23,6 +23,7 @@ import com.lksnext.ParkingELadron.domain.EstadoReserva;
 import com.lksnext.ParkingELadron.domain.Reserva;
 import com.lksnext.ParkingELadron.view.adapters.ReservaAdapter;
 import com.lksnext.ParkingELadron.view.dialog.ReservaDialog;
+import com.lksnext.ParkingELadron.viewmodel.CrearViewModel;
 import com.lksnext.ParkingELadron.viewmodel.ReservasViewModel;
 
 import java.util.ArrayList;
@@ -175,5 +176,9 @@ public class ReservasFragment extends Fragment {
         } catch (Exception e) {
             System.out.println("Error al cancelar workers: " + e.getMessage());
         }
+    }
+
+    public CrearViewModel getViewModel() {
+        return new ViewModelProvider(requireActivity()).get(CrearViewModel.class);
     }
 }

@@ -49,7 +49,7 @@ public class ReservaDialog extends Dialog {
         binding.tvHoras.setText(DateUtil.isoToLocalHour(reserva.getHoraInicio())+" - "+DateUtil.isoToLocalHour(reserva.getHoraFin()));
 
         if(reserva!=null) {
-            binding.tvSpot.setText(getContext().getString(R.string.plaza));
+            binding.tvSpot.setText(getContext().getString(R.string.plaza) + " " + reserva.getPlaza().getId());
         }
 
 

@@ -20,8 +20,12 @@ public class DateUtil {
     }
 
     public static String isoToLocalHour(String isoString) {
-        ZonedDateTime zdt = ZonedDateTime.parse(isoString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        // Convertir a la zona horaria local del sistema
+        ZonedDateTime zdt;
+        try {
+            zdt = ZonedDateTime.parse(isoString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } catch (Exception e) {
+            zdt = ZonedDateTime.parse(isoString, DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC")));
+        }
         ZonedDateTime localZdt = zdt.withZoneSameInstant(ZoneId.systemDefault());
         return localZdt.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"));
     }
