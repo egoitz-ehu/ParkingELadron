@@ -36,7 +36,7 @@ public class CrearViewModel extends ViewModel {
 
     private final MutableLiveData<String> workerId2 = new MutableLiveData<>();
 
-    private final DataRepository dataRepository;
+    private DataRepository dataRepository;
 
     public CrearViewModel() {
         this(DataRepository.getInstance());
@@ -172,6 +172,10 @@ public class CrearViewModel extends ViewModel {
 
     public void storeWorkerInRepository(String workerId, String reservaId, String type) {
         dataRepository.storeWorkerId(workerId, reservaId, type);
+    }
+
+    public void setDataRepository(DataRepository dataRepository) {
+        this.dataRepository = dataRepository;
     }
 }
 

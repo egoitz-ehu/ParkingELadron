@@ -13,10 +13,16 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import androidx.fragment.app.testing.FragmentScenario;
+import androidx.lifecycle.MutableLiveData;
 import androidx.test.espresso.intent.Intents;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.lksnext.ParkingELadron.R;
+import com.lksnext.ParkingELadron.data.DataRepository;
+import com.lksnext.ParkingELadron.domain.EstadoReserva;
+import com.lksnext.ParkingELadron.domain.Plaza;
+import com.lksnext.ParkingELadron.domain.Reserva;
+import com.lksnext.ParkingELadron.domain.TiposPlaza;
 import com.lksnext.ParkingELadron.view.activity.SelectParkingSpotActivity;
 
 import org.hamcrest.Matchers;
@@ -25,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -82,153 +89,90 @@ public class CrearFragmentTest {
         intended(Matchers.not(hasComponent(SelectParkingSpotActivity.class.getName())));
     }
 
-    @Test
-    public void testCrearReservaExitosaMuestraToastYReseteaFormulario() {
-        final boolean[] reservaCreada = new boolean[1];
-        reservaCreada[0] = false;
+    private class FakeRepository extends DataRepository {
 
-        final com.lksnext.ParkingELadron.databinding.FragmentCrearBinding[] bindingRef =
-                new com.lksnext.ParkingELadron.databinding.FragmentCrearBinding[1];
+        private MutableLiveData<Reserva> reservaMutableLiveData = new MutableLiveData<>();
 
-        class FakeRepository extends com.lksnext.ParkingELadron.data.DataRepository {
-            public FakeRepository() { super(null); }
-            @Override
-            public void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, String type, OnReservationCompleteListener listener) {
-                reservaCreada[0] = true;
-                listener.onReservationSuccess(parkingId, spotId, "fake_reservation_id");
-            }
+        public FakeRepository() {
+            super(null); // Pasar un contexto falso o nulo
         }
 
+        @Override
+        public void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, String type, OnReservationCompleteListener listener) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                this.reservaMutableLiveData.setValue(new Reserva(format.parse(day), startTime, endTime, new Plaza(spotId, TiposPlaza.valueOf(type)), userId, EstadoReserva.Reservado,null, parkingId));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            listener.onReservationSuccess("a","a","a");
+        }
+    }
+
+    @Test
+    public void testCrearReservaExitosaMuestraToastYReseteaFormulario() {
         FragmentScenario<CrearFragment> scenario = FragmentScenario.launchInContainer(
                 CrearFragment.class,
-                null,
-                R.style.Theme_ParkingELadron
+                null,  // Bundle de argumentos
+                R.style.Theme_ParkingELadron  // Tema
         );
 
         scenario.onFragment(fragment -> {
-            com.lksnext.ParkingELadron.viewmodel.CrearViewModel fakeViewModel =
-                    new com.lksnext.ParkingELadron.viewmodel.CrearViewModel(new FakeRepository());
-
-            try {
-                java.lang.reflect.Field vmField = fragment.getClass().getDeclaredField("viewModel");
-                vmField.setAccessible(true);
-                vmField.set(fragment, fakeViewModel);
-
-                java.lang.reflect.Field bindingField = fragment.getClass().getDeclaredField("binding");
-                bindingField.setAccessible(true);
-                com.lksnext.ParkingELadron.databinding.FragmentCrearBinding binding =
-                        (com.lksnext.ParkingELadron.databinding.FragmentCrearBinding) bindingField.get(fragment);
-
-                bindingRef[0] = binding;
-
-                java.util.Calendar cal = java.util.Calendar.getInstance();
-                fakeViewModel.setDate(cal.getTime());
-                fakeViewModel.setHoraInicio("10:00");
-                fakeViewModel.setHoraFin("12:00");
-                fakeViewModel.setPlazaSeleccionada(new com.lksnext.ParkingELadron.domain.Plaza("P1", com.lksnext.ParkingELadron.domain.TiposPlaza.NORMAL));
-
-                java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("dd-MM-yyyy");
-                binding.tvDia.setText(format.format(cal.getTime()));
-                binding.tvHoraInicio.setText("10:00");
-                binding.tvHoraSalida.setText("12:00");
-                binding.btnSeleccionar.setText("P1");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Plaza plaza = new Plaza(
+                    "P1", TiposPlaza.NORMAL
+            );
+            DataRepository repository = new FakeRepository();
+            fragment.getViewModel().setDataRepository(repository);
+            fragment.getViewModel().setPlazaSeleccionada(plaza);
         });
 
-        try { Thread.sleep(300); } catch (InterruptedException e) { e.printStackTrace(); }
+        onView(withId(R.id.cvDia)).perform(click());
+        onView(withId(android.R.id.button1)).perform(click());
 
-        onView(withId(R.id.tvHoraInicio)).check(matches(withText("10:00")));
-        onView(withId(R.id.tvHoraSalida)).check(matches(withText("12:00")));
+        onView(withId(R.id.cvHoraInicio)).perform(click());
+        onView(withId(android.R.id.button1)).perform(click());
+
+        onView(withId(R.id.cvHoraSalida)).perform(click());
+        onView(withId(android.R.id.button1)).perform(click());
 
         onView(withId(R.id.btnCrear)).perform(click());
 
-        try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
-
-        scenario.onFragment(fragment -> {
-            bindingRef[0].tvDia.setText(fragment.getString(R.string.crear_selectDia));
-            bindingRef[0].tvHoraInicio.setText(fragment.getString(R.string.crear_selectHoraEntrada));
-            bindingRef[0].tvHoraSalida.setText(fragment.getString(R.string.crear_selectHoraSalida));
-            bindingRef[0].btnSeleccionar.setText(fragment.getString(R.string.crear_select_plaza));
-
-            assert reservaCreada[0] : "No se creó la reserva";
-        });
-
-        onView(withId(R.id.tvDia)).check(matches(withText(R.string.crear_selectDia)));
-        onView(withId(R.id.tvHoraInicio)).check(matches(withText(R.string.crear_selectHoraEntrada)));
-        onView(withId(R.id.tvHoraSalida)).check(matches(withText(R.string.crear_selectHoraSalida)));
-        onView(withId(R.id.btnSeleccionar)).check(matches(withText(R.string.crear_select_plaza)));
+        onView(withId(R.id.tvDia))
+                .check(matches(withText(R.string.crear_selectDia)));
+        onView(withId(R.id.tvHoraInicio))
+                .check(matches(withText(R.string.crear_selectHoraEntrada)));
+        onView(withId(R.id.tvHoraSalida))
+                .check(matches(withText(R.string.crear_selectHoraSalida)));
     }
 
     @Test
     public void testCrearReservaErrorDatosNoValidos() {
-        final boolean[] reservaCreada = new boolean[1];
-        reservaCreada[0] = false;
+            FragmentScenario<CrearFragment> scenario = FragmentScenario.launchInContainer(
+                    CrearFragment.class,
+                    null,  // Bundle de argumentos
+                    R.style.Theme_ParkingELadron  // Tema
+            );
 
-        final com.lksnext.ParkingELadron.databinding.FragmentCrearBinding[] bindingRef =
-                new com.lksnext.ParkingELadron.databinding.FragmentCrearBinding[1];
+            scenario.onFragment(fragment -> {
+            });
 
-        class FakeRepository extends com.lksnext.ParkingELadron.data.DataRepository {
-            public FakeRepository() { super(null); }
-            @Override
-            public void createReservation(String parkingId, String spotId, String day, String startTime, String endTime, String userId, String type, OnReservationCompleteListener listener) {
-                reservaCreada[0] = true;
-                listener.onReservationSuccess(parkingId, spotId, "fake_reservation_id");
-            }
-        }
+            onView(withId(R.id.cvDia)).perform(click());
+            onView(withId(android.R.id.button1)).perform(click());
 
-        FragmentScenario<CrearFragment> scenario = FragmentScenario.launchInContainer(
-                CrearFragment.class,
-                null,
-                R.style.Theme_ParkingELadron
-        );
+            onView(withId(R.id.cvHoraInicio)).perform(click());
+            onView(withId(android.R.id.button1)).perform(click());
 
-        Calendar cal = java.util.Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+            onView(withId(R.id.cvHoraSalida)).perform(click());
+            onView(withId(android.R.id.button1)).perform(click());
 
-        scenario.onFragment(fragment -> {
-            com.lksnext.ParkingELadron.viewmodel.CrearViewModel fakeViewModel =
-                    new com.lksnext.ParkingELadron.viewmodel.CrearViewModel(new FakeRepository());
+            onView(withId(R.id.btnCrear)).perform(click());
 
-            try {
-                java.lang.reflect.Field vmField = fragment.getClass().getDeclaredField("viewModel");
-                vmField.setAccessible(true);
-                vmField.set(fragment, fakeViewModel);
-
-                java.lang.reflect.Field bindingField = fragment.getClass().getDeclaredField("binding");
-                bindingField.setAccessible(true);
-                com.lksnext.ParkingELadron.databinding.FragmentCrearBinding binding =
-                        (com.lksnext.ParkingELadron.databinding.FragmentCrearBinding) bindingField.get(fragment);
-
-                bindingRef[0] = binding;
-
-                fakeViewModel.setDate(cal.getTime());
-                fakeViewModel.setHoraInicio("10:00");
-                fakeViewModel.setHoraFin("12:00");
-                fakeViewModel.setPlazaSeleccionada(null);
-
-                binding.tvDia.setText(format.format(cal.getTime()));
-                binding.tvHoraInicio.setText("10:00");
-                binding.tvHoraSalida.setText("12:00");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        try { Thread.sleep(300); } catch (InterruptedException e) { e.printStackTrace(); }
-
-        onView(withId(R.id.tvHoraInicio)).check(matches(withText("10:00")));
-        onView(withId(R.id.tvHoraSalida)).check(matches(withText("12:00")));
-
-        onView(withId(R.id.btnCrear)).perform(click());
-
-        try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
-
-        onView(withId(R.id.tvDia)).check(matches(withText(format.format(cal.getTime()))));
-        onView(withId(R.id.tvHoraInicio)).check(matches(withText("10:00")));
-        onView(withId(R.id.tvHoraSalida)).check(matches(withText("12:00")));
-        onView(withId(R.id.btnSeleccionar)).check(matches(withText(R.string.crear_select_plaza)));
+            onView(withId(R.id.tvDia))
+                    .check(matches(Matchers.not(withText(R.string.crear_selectDia))));
+            onView(withId(R.id.tvHoraInicio))
+                    .check(matches(Matchers.not(withText(R.string.crear_selectHoraEntrada))));
+            onView(withId(R.id.tvHoraSalida))
+                    .check(matches(Matchers.not(withText(R.string.crear_selectHoraSalida))));
     }
 
     private android.app.Activity getActivity(FragmentScenario<?> scenario) {
