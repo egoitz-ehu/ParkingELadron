@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Usa AppCompat que ya tiene los atributos colorPrimary, colorPrimaryDark y colorAccent -->
+    <style name="Theme.ParkingELadron.Test" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/mainOrange</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/mainOrange</item>
+    </style>
+</resources>

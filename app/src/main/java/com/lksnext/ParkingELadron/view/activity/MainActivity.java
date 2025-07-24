@@ -11,7 +11,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.lksnext.ParkingELadron.R;
 import com.lksnext.ParkingELadron.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private ActivityMainBinding binding;
     private NavController navController;
@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
                 navController.navigate(R.id.reservasFragment);
                 return true;
             } else if(itemId == R.id.create) {
+                navController.navigate(R.id.crearFragment);
                 return true;
             } else if(itemId == R.id.profile) {
                 navController.navigate(R.id.profileFragment);

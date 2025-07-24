@@ -16,4 +16,9 @@
         android:name="com.lksnext.ParkingELadron.view.fragment.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/crearFragment"
+        android:name="com.lksnext.ParkingELadron.view.fragment.CrearFragment"
+        android:label="fragment_crear"
+        tools:layout="@layout/fragment_crear" />
 </navigation>

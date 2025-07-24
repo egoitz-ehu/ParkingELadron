@@ -11,7 +11,7 @@
     <string name="login_password">Ingresa la contraseña</string>
     <string name="login_enter">Entrar en la cuenta</string>
     <string name="login_another">Otra forma</string>
-    <string name="login_forget">¿Olvidaste tu contraseña</string>
+    <string name="login_forget">¿Olvidaste tu contraseña?</string>
     <string name="login_create">¿No tienes cuenta? Crea una</string>
 
     <string name="register_title">Registrarse</string>
@@ -22,9 +22,82 @@
     <string name="register_create">Crear una cuenta</string>
     <string name="register_already">¿Ya tienes cuenta? Inicia sesión</string>
 
+    <string name="title_crear">Reservar</string>
+    <string name="crear_selectDia">Selecciona un día</string>
+    <string name="crear_selectHoraEntrada">Selecciona hora de entrada</string>
+    <string name="crear_selectHoraSalida">Selecciona hora de salida</string>
+    <string name="crear_reserrva">Crear reserva</string>
+    <string name="crear_select_plaza">Seleccionar plaza:</string>
+
+    <string name="op_normal">Normal</string>
+    <string name="op_electrico">Electrico</string>
+    <string name="op_minusvalido">Accesible</string>
+    <string name="op_moto">Moto</string>
+
     <string name="var_see">Ver reservas</string>
     <string name="var_create">Realizar reserva</string>
     <string name="var_profile">Perfil</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="perfil_title">Perfil</string>
+    <string name="perfil_info">Información</string>
+    <string name="perfil_name">Nombre:</string>
+    <string name="perfil_surname">Apellido:</string>
+    <string name="perfil_email">Email:</string>
+    <string name="perfil_change">Cambiar la contraseña</string>
+
+    <string name="forgot_title">Recuperar cuenta</string>
+    <string name="forgot_newPass">Ingresa la nueva contraseña</string>
+    <string name="forgot_newPassConfirm">Confirmar la nueva contraseña</string>
+    <string name="forgot_change">Cambiar contraseña</string>
+
+    <string name="change_title">Cambiar contraseña</string>
+
+    <string name="reserva_empty">No tienes reservas. Crea una para empezar.</string>
+
+    <string name="editart_btn">Guardar cambios</string>
+    <string name="editar_preguntar">¿Quieres editar la reserva?</string>
+    <string name="editar_si">Sí</string>
+    <string name="editar_no">No</string>
+    <string name="title_editado">Reserva editada</string>
+    <string name="reserva_editado">La reserva ha sido editada con exito</string>
+
+    <string name="dialog_reserva">Editar</string>
+    <string name="dialog_eliminar">Eliminar</string>
+
+    <string name="reserva_todos">Todos</string>
+    <string name="reserva_reservado">Reservado</string>
+    <string name="reserva_enMarcha">En marcha</string>
+    <string name="reserva_finalizado">Finalizado</string>
+
+    <string name="spot_not_available">Esta plaza no está disponible en el horario seleccionado</string>
+    <string name="selected_spot">Plaza seleccionada: </string>
+    <string name="reserva_max_time">La reserva puede ser máximo de 9 horas</string>
+    <string name="reserva_creada">Reserva creada con éxito</string>
+    
+    <string name="worker_30_near">¡Tu reserva está cerca!</string>
+    <string name="worker_30_near_desc">Quedan 30 minutos para que comience tu reserva.</string>
+    <string name="worker_15_near">¡Tu reserva está por terminar!</string>
+    <string name="worker_15_near_desc">Quedan 15 minutos para que finalice tu reserva.</string>
+
+    <string name="select_parking_title">Selecciona una plaza de estacionamiento</string>
+    <string name="legend_normal">Normal</string>
+    <string name="legend_disabled">Minusválidos</string>
+    <string name="legend_electric">Eléctrico</string>
+    <string name="legend_motorcycle">Moto</string>
+    <string name="legend_available">Disponible</string>
+    <string name="legend_unavailable">No disponible</string>
+
+    <string name="crear_title_fecha">Fecha</string>
+    <string name="crear_title_entrada">Hora de entrada</string>
+    <string name="crear_title_salida">Hora de salida</string>
+    <string name="crear_title_plaza">Plaza de aparcamiento</string>
+
+    <string name="perfil_change_password">Cambiar contraseña</string>
+    <string name="perfil_change_password_message">Se ha enviado un mensaje al correo electronico para cambiar la contraseña</string>
+
+    <string name="ok">Aceptar</string>
+
+    <string name="plaza">Plaza</string>
 </resources>
